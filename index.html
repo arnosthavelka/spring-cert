@@ -48,13 +48,11 @@
     <h3>1. Container</h3>
     <h4>1.1 General</h4>
     <h4>1.1.1 The potential advantages of using Spring's dependency injection?</h4>
-    <p><strong>Pros</strong>
-	<ul>
+	<ul><strong>Pros:</strong>
 		<li>Loosely coupled code</li>
 		<li>Autowire</li>
 		<li>Dependency checking</li>
 	</ul>
-	</p>
     <h4>1.1.2 Dependency injection in XML, using constructor or setter injection</h4>
 	<font color='blue' size="4">Constructor</font>
     <p><strong>&lt;constructor-arg/&gt;</strong> -  Only works if there is no ambiguity in args</p>
@@ -201,6 +199,63 @@
 	</ul>
 	<h4><font color='brown'>1.x What is a BeanFactory?</font></h4>
 	<p>Underlying basis for Spring's IoC functionality</p>	
-</body>
 
+	<h4>1.3 Annotations</h4>
+	<h4>1.3.1 Enabling component-scanning</h4>
+	<ul><strong>&lt;context:component-scan /&gt;</strong>
+		<li>Looks for @Component (general), @Controller (web),  @Repository (dao) and @Service (service)</li>
+		<li>Can set context:include-filter and context:exclude-filter  elements</li>
+	</ul>
+	<p>Example:</p>
+<pre class="prettyprint"><code class="language-xml">&lt;context:component-scan  base-package="org.example"&gt;
+    &lt;context:include-filter type="regex"  expression=".*Stub.*Repository"/&gt;
+    &lt;context:exclude-filter type="annotation"  expression="org.springframework.stereotype.Repository"/&gt;
+&lt;/context:component-scan>
+</code></pre>
+	<h4>1.3.2 Behavior of the annotation @Autowired with regards to field  injection, constructor injection and method injection</h4>
+	<ul>Modes:
+		<li><strong>no</strong>: (default) No auto-wiring will be performed.  You must wire the dependencies explicitly.</li>
+		<li>byName: For each bean property, wire a bean with  the same name as the property.</li>
+		<li>byType: For each bean property, wire a bean  whose type is compatible with that of the property.</li>
+		<li>constructor: If a default constructor with no  argument is found, the dependencies will be auto-wired by type. Otherwise, they  will be auto-wired by constructor.</li>
+	</ul>
+	<p>If &gt; 1 match, throws exception (unless injecting into  Collection). <br>
+		If no matches, autowiring fails unless using @Required or  &quot;required&quot; attribute</p>
+	<p>May be applied to: </p>
+	<ul>
+		<li>setter methods</li>
+		<li>methods with arbitrary names and/or multiple  arguments</li>
+		<li>constructors</li>
+		<li>fields (even private ones)</li>
+		<li>arrays (whereby all beans of a particular type  from the ApplicationContext are injected)</li>
+		<li>typed collections</li>
+		<li>typed maps (as long as the key is a  java.lang.String )</li>
+	</ul>
+	<h4>1.3.3 How does the @Qualifier annotation complement the use of @Autowired?</h4>
+	<ul>
+		<li><strong>@Qualifier(name)</strong> - specifies specific bean name if desired (e.g. to choose one of many beans of same type)</li>
+		<li>the bean name is considered as a default qualifier value (when no quilifier is defined)</li>
+	</ul>
+	<h4>1.3.4 What is the role of the @PostConstruct and @PreDestroy annotations?</h4>
+	<p>Similar to init-method and destroy-method </p>
+	<h4>1.3.5 Enabling the scanning of annotations such as @Required and  @PreDestroy?</h4>
+	<p>Use <strong>&lt;context:annotation-config /&gt;</strong> for (Spring's @Required and @Autowired, JSR  250's @PostConstruct, @PreDestroy and @Resource, PA's @PersistenceContext and  @PersistenceUnit) </p>
+	<ul>
+		<li>&lt;context:component-scan /&gt; can also do what &lt;context:annotation-config /&gt; does but &lt;context:component-scan /&gt; also scans packages to find and register beans within the application context.</li>
+		<li>@Required goes on setters, not fields</li>
+		<li>@PostConstruct, @PreDestroy goes on methods</li>
+	</ul>
+	<h4><font color='brown'>1.3.x6 Scheduled tasks</font></h4>
+	<ul>
+		<li>@Scheduled(fixedDelay=5000)</li>
+		<li>@Async</li>
+	</ul>
+	<h4><font color='brown'>1.3.x7 SpEL</font></h4>
+	<ul>
+		<li>Code: (new  SpelExpressionParser()).parseExpression(&quot;numberGuess.randomNumber&quot;).getValue(target)</li>
+		<li>Xml: value=&quot;#{numberGuess.randomNumber}&quot;/&gt;</li>
+		<li>Annotation:  @Value(&quot;#{numberGuess.randomNumber}&quot;)</li>
+	</ul>
+	
+</body>
 </html> 
