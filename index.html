@@ -18,7 +18,7 @@
 	<h1>Spring Core 3.2 - Study Notes © 2013 Arnošt Havelka</h1>
 
 	<h2>Disclaimer</h2>
-    <p>This artical is based on <strong><a href="http://www.selikoff.net/2010/08/20/jeannes-core-spring-3-certification-experiences/">jeanne’s core spring 3 certification experiences</a> by Jeanne Boyarsky</strong> and <strong><a href="http://springcert.sourceforge.net/">Core Spring Professional Certification Study Guides, Resources, Mock Exams</a> by Gavin Lasnitzki</strong> sources. My notes is just an extenstion (in some areas) and update to spring framework 3.2.x.</p>
+    <p>This artical is heavily based on artical <strong><a href="http://springcert.sourceforge.net/">Core Spring Professional Certification Study Guides, Resources, Mock Exams</a> by Gavin Lasnitzki</strong> (and of course <strong><a href="http://www.selikoff.net/2010/08/20/jeannes-core-spring-3-certification-experiences/">jeanne’s core spring 3 certification experiences</a> by Jeanne Boyarsky</strong>). My notes is just an extenstion (in some areas) and update to spring framework 3.2.x.</p>
     <p>I have <strong>copied / reposted </strong> them, changed the formatting and added where I thought appropriate.</p>
 	
 	<h2>SpringSource Certification</h2>
@@ -55,7 +55,8 @@
 		<li>Dependency checking</li>
 	</ul>
 	</p>
-    <h4>1.1.2 Dependency injection in XML, using constructor</h4>
+    <h4>1.1.2 Dependency injection in XML, using constructor or setter injection</h4>
+	<font color='blue' size="4">Constructor</font>
     <p><strong>&lt;constructor-arg/&gt;</strong> -  Only works if there is no ambiguity in args</p>
     <p>Use the following attributes to reduce ambiguity:</p>
     <ul>
@@ -84,7 +85,7 @@
 &lt;bean id="foo" class="x.y.Foo" c:_0-ref="bar" c:_1-ref="baz"&gt;
 </code></pre>
 
-    <h4>1.1.3 Dependency injection in XML, using setter injection</h4>
+	<font color='blue' size="4">Setter</font>
 	<p><strong>&lt;property/&gt;</strong></p>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
 	&lt;property name="value" value="my value"/&gt; -- literal value
@@ -99,7 +100,7 @@
 &lt;bean id="foo" class="x.y.Foo" c:_0="my value" c:_1-ref="myService"&gt;
 </code></pre>
 
-    <h4>1.1.4 Scopes</h4>
+    <h4>1.1.3 Scopes</h4>
     <p>Supported</p>
 	<ul>
 		<li>Singleton (default)</li>
@@ -107,6 +108,99 @@
 		<li>Web (request, session and global session)</li>
     </ul>
 
+	<h4>1.2 Lifecycle</h4>
+    <h4>1.2.1 How to declare an initialization method in a Spring bean?</h4>
+	<ul>
+		<li>XML: &lt;bean ... <strong>init-method</strong>="init"&gt;</li>
+		<li>JSR-250: <strong>@PostConstruct</strong></li>
+		<li>Implement <strong>BeanPostProcessors#xyzProcessBeforeInitialization</strong></li>
+		<li>Implement <strong>InitializingBean</strong></li>
+	</ul>
+    <h4>1.2.2 How to declare a destroy method in a Spring bean?</h4>
+	<ul>
+		<li>XML: &lt;bean ... <strong>destroy-method</strong>="finish"&gt;</li>
+		<li>JSR-250: <strong>@PreDestroy</strong></li>
+		<li>Implement <strong>DisposableBean</strong></li>
+	</ul>
+    <h4>1.2.3 Default bean instantiation policy: when are beans instantiated?</h4>
+    <p>For Singleton, when app context is created / parsed</p>
+    <p>To specify instantiation policy</p>
+	<ul>
+		<li>Use &quot;lazy-init&quot; on the  &quot;bean&quot; element</li>
+		<li>Use the &quot;default-lazy-init&quot; on the  &quot;beans&quot; element</li>
+	</ul>
+    <p><font color='blue' size="4">Lifecycle:</font>
+	<svg style="width:400px; height:350px;">
+		<text x="80" y="20">Definition of application context</text>
+		<line x1="180" y1="35" x2="180" y2="80" stroke="#000000" stroke-width="2"/>
+		<line x1="170" y1="70" x2="180" y2="80" stroke="#000000" stroke-width="2"/>
+		<line x1="190" y1="70" x2="180" y2="80" stroke="#000000" stroke-width="2"/>
+		<text x="190" y="65" fill="blue">1</text>
+		
+		<text x="0" y="130">BFPP</text>
+		<line x1="20" y1="110" x2="100" y2="110" stroke="#000000" stroke-width="2"/>
+		<line x1="90" y1="100" x2="100" y2="110" stroke="#000000" stroke-width="2"/>
+		<line x1="90" y1="120" x2="100" y2="110" stroke="#000000" stroke-width="2"/>
+		<text x="40" y="105" fill="blue">2 + 3</text>
+					
+		<rect x="100" y="80" width="150" height="60" stroke="#000000"	stroke-width="4" fill="#AAAAFF" />
+		<text x="120" y="120">Bean Definition</text>
+		
+		<line x1="180" y1="140" x2="180" y2="180" stroke="#000000" stroke-width="2"/>
+		<line x1="170" y1="170" x2="180" y2="180" stroke="#000000" stroke-width="2"/>
+		<line x1="190" y1="170" x2="180" y2="180" stroke="#000000" stroke-width="2"/>
+		<text x="190" y="165" fill="blue">4 + 5</text>
+		
+		<text x="0" y="230">BPP</text>
+		<line x1="20" y1="210" x2="100" y2="210" stroke="#000000" stroke-width="2"/>
+		<line x1="90" y1="200" x2="100" y2="210" stroke="#000000" stroke-width="2"/>
+		<line x1="90" y1="220" x2="100" y2="210" stroke="#000000" stroke-width="2"/>
+		<text x="40" y="205" fill="blue">7 + 10</text>
+
+		<rect x="100" y="180" width="150" height="60" stroke="#000000"	stroke-width="4" fill="#AAAAFF" />
+		<text x="140" y="220">Instance</text>
+		
+		<line x1="180" y1="240" x2="180" y2="290" stroke="#000000" stroke-width="2"/>
+		<line x1="170" y1="280" x2="180" y2="290" stroke="#000000" stroke-width="2"/>
+		<line x1="190" y1="280" x2="180" y2="290" stroke="#000000" stroke-width="2"/>
+		<text x="190" y="275" fill="blue">5</text>
+		
+		<text x="160" y="310">Ready</text>
+	</svg>
+	<ol><strong>Init:</strong>
+		<li>Load all  bean definitions to create an ordered graph (the  container tries to set properties and resolve dependencies as late as possible)</li>
+		<li>Instantiate bean definition</li>
+		<li>Instantiate each bean</li>
+		<li>Set properties</li>
+		<li>BeanPostProcessors (#postProcessBeforeInitialization)</li>
+		<li>@PostConstruct</li>
+		<li>InitializingBean (#afterPropertiesSet)</li>
+		<li>Call init-method</li>
+		<li>BeanPostProcessors (#postProcessAfterInitialization)</li>
+	</ol>
+	<ol><strong>Destroy:</strong>
+		<li>@PreDestroy</li>
+		<li>DisposableBean (#destroy)</li>
+		<li>Call destroy-method</li>
+	</ol>
+	<p><font color='blue' size="4">Mem:</font>
+	<ul>
+		<li>Order (by component): XML: context, BFPP, new, set, BPP#before,  init[@PostConstruct, Init#after, init-method], BPP#after, dispose[@PreDestroy,  Disp#destroy, destroy-method]</li>
+		<li>Sequence (by type): init / destroy order is: (@) annotation, (#)  interface method, (-) xml attribute</strong></li>
+	</ul>
+	<font color='blue' size="4">What are BeanFactoryPostProcessors and BeanPostProcessors? When are  they called in the startup process?</font>
+	<ul><strong>BeanFactoryPostProcessors</strong>
+		<li>Each processor is called once per xml (i.e per  application context)</li>
+		<li>Before beans are instantiated</li>
+		<li>Can change bean configuration / definitions</li>
+		<li>If BeanFactoryPostProcessors are marked as being  lazily-initialized they will NOT be instantiated and will NOT apply their logic.</li>
+	</ul>
+	<ul><strong>BeanPostProcessors</strong>
+		<li>Each processor is called once per bean</li>
+		<li>Can run before / after a bean is initialised </li>
+	</ul>
+	<h4><font color='brown'>1.x What is a BeanFactory?</font></h4>
+	<p>Underlying basis for Spring's IoC functionality</p>	
 </body>
 
 </html> 
