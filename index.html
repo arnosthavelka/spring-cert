@@ -46,14 +46,14 @@
 
 	<h2>Spring Framewwork 3.2 - Certification Study Notes</div></h2>
     <h3>1. Container</h3>
-    <h4>1.1 General</h4>
+    <h3>1.1 General</h3>
     <h4>1.1.1 The potential advantages of using Spring's dependency injection?</h4>
 	<ul><strong>Pros:</strong>
 		<li>Loosely coupled code</li>
 		<li>Autowire</li>
 		<li>Dependency checking</li>
 	</ul>
-    <h4>1.1.2 Dependency injection in XML, using constructor or setter injection</h4>
+    <h3>1.1.2 Dependency injection in XML, using constructor or setter injection</h3>
 	<font color='blue' size="4">Constructor</font>
     <p><strong>&lt;constructor-arg/&gt;</strong> -  Only works if there is no ambiguity in args</p>
     <p>Use the following attributes to reduce ambiguity:</p>
@@ -200,7 +200,7 @@
 	<h4><font color='brown'>1.x What is a BeanFactory?</font></h4>
 	<p>Underlying basis for Spring's IoC functionality</p>	
 
-	<h4>1.3 Annotations</h4>
+	<h3>1.3 Annotations</h3>
 	<h4>1.3.1 Enabling component-scanning</h4>
 	<ul><strong>&lt;context:component-scan /&gt;</strong>
 		<li>Looks for @Component (general), @Controller (web),  @Repository (dao) and @Service (service)</li>
@@ -256,6 +256,234 @@
 		<li>Xml: value=&quot;#{numberGuess.randomNumber}&quot;/&gt;</li>
 		<li>Annotation:  @Value(&quot;#{numberGuess.randomNumber}&quot;)</li>
 	</ul>
-	
+
+	<h3>1.4 Miscellaneous</h3>
+	<h4>1.4.1 How to inject scalar/literal values into Spring beans?</h4>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="exampleBean" class="examples.ExampleBean"&gt;
+	&lt;property ...&gt;<strong>&lt;value&gt;b@b.com&lt;/value&gt;</strong>&lt;/property&gt; -- element
+	&lt;property ... <strong>value=&quot;b@b.com&quot;</strong> /&gt; -- attribute
+	&lt;bean ...  <strong>p:email=&quot;b@b.com&quot;</strong> /&gt; - P namespace
+&lt;/bean&gt;
+</code></pre>
+	<ul>
+		<li>Empty: &lt;property  name=&quot;email&quot;&gt;&lt;value/&gt;&lt;/property&gt;</li>
+		<li>Null: &lt;property name=&quot;a&quot;&gt;&lt;null  /&gt;&lt;/property&gt;</li>
+		<li>Compound property names: person.address.streetNo</li>
+	</ul>
+      <h4>1.4.2 How to refer to a collection in a Spring bean definition?</h4>
+      <p>List</p>
+<pre class="prettyprint"><code class="language-xml">&lt;list&gt;
+    &lt;ref  bean="one" /&gt;
+&lt;/list&gt;
+</code></pre>
+      <p>Set</p>
+<pre class="prettyprint"><code class="language-xml">&lt;set&gt;
+    &lt;ref bean="one" /&gt;
+&lt;/set&gt;
+</code></pre>
+      <p>Properties</p>
+<pre class="prettyprint"><code class="language-xml">&lt;props&gt;
+    &lt;prop key="a" value="b" /&gt;
+&lt;/props&gt;
+</code></pre>
+      <p>Map</p>
+<pre class="prettyprint"><code class="language-xml">&lt;map&gt;
+    &lt;entry key="a" value="b" /&gt;
+&lt;/map&gt;
+</code></pre>
+      <p>or</p>
+<pre class="prettyprint"><code class="language-xml">&lt;map&gt;
+    &lt;entry&gt;
+        &lt;key&gt;
+            &lt;value>a&lt;/value&gt;
+        &lt;/key&gt;
+        &lt;value&gt;b&lt;/value&gt;
+    &lt;/entry&gt;
+&lt;/map&gt;
+</code></pre>
+      <p>&nbsp;</p>
+      <p>The value of a map key or value, or a set value, can also again be any of the following elements:
+        <br>
+      bean | ref | idref | list | set | map | props | value | null </p>
+      <p>If you need to refer to this outside a &lt;bean /&gt; or  need to specify list/set/map type, use util namespace (i.e. util:list)</p>
+      <p>Example   <br>
+      </p>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: xml">
+/*<![CDATA[ 
+<util:list id="beanList" list-class="java.util.LinkedList">
+    <ref bean="one" />
+</util:list>
+]]>*/
+      </script>
+      </div>
+      <p>&nbsp;</p>
+      <p>Use the &quot;parent&quot; attribute to inherit (and  merge entries) from a parent collection.</p>
+      <p>Strongly typed collections</p>
+      <ul>
+        <li>Entries will be converted to the appropriate  type prior to being added to the Collection</li>
+      </ul>
+      <h4>1.4.3 How to create an ApplicationContext? </h4>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: java">
+/*<![CDATA[ 
+ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");
+]]>*/
+      </script>
+      </div>
+      <p><br>
+        Supports multiple resources<br>
+      </p>
+      <h4>1.4.4 What are the resource prefixes that can be used? </h4>
+      <p>classpath:<br>
+        file:<br>
+        http:</p>
+      <h4>1.4.5 How to refer to a Spring configuration file inside a package? </h4>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: java">
+/*<![CDATA[ 
+new ClasspathXmlApplicationContext("/com/mine/app-config.xml");
+]]>*/
+      </script>
+      </div>
+      <p>&nbsp;</p>
+      <h4>1.4.6 The different implementations of ApplicationContext that can be used  in an application</h4>
+      <p>ClasspathXmlApplicationContext </p>
+      <ul>
+        <li>Defaults to classpath:</li>
+        <li>Starts looking from root of classpath regardless  of whether specify &quot;/&quot;</li>
+      </ul>
+      <p>FileSystemXmlApplicationContext </p>
+      <ul>
+        <li>Defaults to file:</li>
+        <li>Uses relative path even if specify  &quot;/&quot;, but &quot;file:/mine&quot; forces an absolute path</li>
+      </ul>
+      <p>XmlWebApplicationContext </p>
+      <ul>
+        <li>Defaults to file: in  /WEB-INF/applicationContext.xml</li>
+        <li>Uses path relative to web application</li>
+      </ul>
+      <h4>1.4.7 How to externalize constants from a Spring XML configuration file  into a .properties file?</h4>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: xml">
+/*<![CDATA[ 
+<context:property-placeholder location="/myFile.properties" />
+]]>*/
+      </script>
+      </div>
+      <p>&nbsp;</p>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: xml">
+/*<![CDATA[ 
+<bean id="mind" class="Mine">
+    <property  name="a" value="${myProperty}" />
+</bean>
+]]>*/
+      </script>
+      </div>
+      <p>&nbsp;</p>
+      <h4>1.4.8 Purpose and usage of bean definition inheritance</h4>
+      <p>Extract common bean setup into one &quot;super&quot; bean  to reduce duplicate setup code<br>
+      </p>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: xml">
+/*<![CDATA[ 
+<bean  id="parentBean" class="MyClass" abstract="true"  />
+<bean  id="child" parent="parentBean"  class="MyDerivedClass"/>
+]]>*/
+      </script>
+      </div>
+      <p><br>
+        A bean without  a class or factory is implicitly abstract.</p>
+      <p>The &quot;abstract&quot; attribute is optional but good  practice as it prevents the bean from being instantiated by the container. </p>
+      <p>The parent class does not have to be abstract and can  still be instantiated using the new operator.</p>
+      <h4>1.4.9 How to use the p namespace?</h4>
+      <p>Set property as attributes<br>
+      </p>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: xml">
+/*<![CDATA[ 
+<bean  id="a" class="MyClass"  
+    p:propName1="value"
+    p:propName2-ref="otherBean"/>  
+]]>*/
+      </script>
+      </div>
+      <p>&nbsp; </p>
+      <h4>1.4.10 Difference between &quot;id&quot; and &quot;name&quot; attributes in  the &lt;bean&gt; tag </h4>
+      <p>Identifiers (id and/or name) must be unique within the  container that hosts the bean.</p>
+      <p>Id </p>
+      <ul>
+        <li>Must be unique </li>
+        <li>Limits the characters that are legal </li>
+      </ul>
+      <p>Name </p>
+      <ul>
+        <li>Can specify multiple names separated by comma,  semicolon or space</li>
+        <li>Allows more characters in name such as slashes</li>
+      </ul>
+      <p>You are not required to supply a name or id for a bean.  If no name or id is supplied explicitly, the container generates a unique name  for that bean. However, if you want to refer to that bean by name you must  provide a name.</p>
+      <h4>1.4.11 Purpose of the &lt;aop:scoped-proxy/&gt; tag</h4>
+      <p>If need to inject a bean with request/session scope into  a bean with singleton scope,  the proxy  intercepts it and makes sure you get the right bean for each call. </p>
+      <p> </p>
+      <div class="code">
+        <script type="syntaxhighlighter" class="brush: xml">
+/*<![CDATA[ 
+<bean  id="userPref" scope="session">
+    <scoped-proxy/>
+</bean>
+
+<bean ...>
+    <property ref="userPref"/>
+</bean>  
+]]>*/
+      </script>
+      </div>
+      <h4>1.4.12 How does FactoryBean work (Optional, From 2.5 sample questions)?</h4>
+      <p>Class name in bean definition (in xml) is that of the  factory</p>
+      <p>Setters called on the factory rather than the created  bean</p>
+      <p>Bean id maps to type returned by factory's getObject()  method</p>
+      <p>To get the actual FactoryBean instance from the container  and not the bean it produces, you preface the bean id with the ampersand symbol</p>
+      <p>Example </p>
+      <ul>
+        <li>Invoking getBean(&quot;myBean&quot;) on the  container returns the product of the FactoryBean</li>
+        <li>Invoking getBean(&quot;&amp;myBean&quot;)  returns the FactoryBean instance itself</li>
+      </ul>
+      <p>To get a bean programatically from the ApplicationContext:</p>
+      <ul>
+        <li>&lt;T&gt; T getBean(Class&lt;T&gt; requiredType) - Return the bean instance that uniquely matches the given object type, if any.</li>
+        <li> Object getBean(String name) - Return an instance, which may be shared or independent, of the specified bean.</li>
+      </ul>
+      <h4>1.4.13 How to inject using a factory method (Jeanne)?</h4>
+      <p>Instance (non-static) factory method: specify  &quot;factory-bean&quot; and &quot;factory-method&quot; attributes </p>
+      <p>Static factory method: specify &quot;class&quot; and  &quot;factory-method&quot; attributes  </p>
+      <p>Use &lt;constructor-arg&gt; to pass parameters</p>
+      <h4>1.4.14 How to use a PropertyEditor (Jeanne)?</h4>
+      <p>Extend PropertyEditorSupport and implement  setAsText(String text) and String getAsText()</p>
+      <h4>1.4.15 Splitting the XML (Jeanne)</h4>
+      <p>&lt;import resource=&quot;local path&quot; /&gt;</p>
+      <p>Prefer &quot;multiple resource locations&quot; as configs  are unaware of each other </p>
+      <p>Relative to the definition file</p>
+      <p>Use classpath:/.. or file:.. if need an absolute path</p>
+      <h4>1.4.16 Other util namespace items (Jeanne)</h4>
+      <p>&lt;util:constant static-field=&quot;fully qualified  name&quot; /&gt;</p>
+      <p>&lt;util:properties location=&quot;property file&quot;  /&gt;</p>
+      <h4>1.4.17 Spring EL (Jeanne)</h4>
+      <p> #{systemProperties.name}</p>
+      <h4>1.4.18 References to other beans (collaborators) (Gavin)   </h4>
+      <p>&lt;ref /&gt;<br>
+        Use the &quot;bean&quot;, &quot;local&quot; or the  &quot;parent&quot; attribute to control lookup context</p>
+      <p>Inner beans</p>
+      <ul>
+        <li>A &lt;bean/&gt; element inside the  &lt;property/&gt; or &lt;constructor-arg/&gt; elements defines a so-called  inner bean.</li>
+        <li>Anonymous prototypes (The &quot;scope&quot; flag  and any &quot;id&quot; or &quot;name&quot; attribute are effectively  ignored.)    </li>
+      </ul>
+      <p> </p>
+      <h4>1.4.19 Autowire (Gavin)</h4>
+      <p>Multiple matches</p>
+      <ul>
+        <li>Use &quot;autowire-candidate&quot; attribute,  &quot;default-autowire-candidates&quot; or &quot;primary&quot; attribute</li>
+      </ul>
+
 </body>
 </html> 
