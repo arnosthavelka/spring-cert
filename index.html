@@ -92,10 +92,7 @@
 </code></pre>
 	<p><strong>P namespace</strong></p>
 <pre class="prettyprint"><code class="language-xml">&lt;beans ...  xmlns:p="http://www.springframework.org/schema/p"&gt;
--- by name
-&lt;bean id="foo" class="x.y.Foo" p:value="my value" c:service-ref="myService"&gt;
--- by index
-&lt;bean id="foo" class="x.y.Foo" c:_0="my value" c:_1-ref="myService"&gt;
+&lt;bean id="foo" class="x.y.Foo" p:value="my value" p:service-ref="myService"/&gt;
 </code></pre>
 
     <h4>1.1.3 Scopes</h4>
@@ -270,28 +267,28 @@
 		<li>Null: &lt;property name=&quot;a&quot;&gt;&lt;null  /&gt;&lt;/property&gt;</li>
 		<li>Compound property names: person.address.streetNo</li>
 	</ul>
-      <h4>1.4.2 How to refer to a collection in a Spring bean definition?</h4>
-      <p>List</p>
+	<h4>1.4.2 How to refer to a collection in a Spring bean definition?</h4>
+	<p>List</p>
 <pre class="prettyprint"><code class="language-xml">&lt;list&gt;
     &lt;ref  bean="one" /&gt;
 &lt;/list&gt;
 </code></pre>
-      <p>Set</p>
+	<p>Set</p>
 <pre class="prettyprint"><code class="language-xml">&lt;set&gt;
     &lt;ref bean="one" /&gt;
 &lt;/set&gt;
 </code></pre>
-      <p>Properties</p>
+	<p>Properties</p>
 <pre class="prettyprint"><code class="language-xml">&lt;props&gt;
     &lt;prop key="a" value="b" /&gt;
 &lt;/props&gt;
 </code></pre>
-      <p>Map</p>
+	<p>Map</p>
 <pre class="prettyprint"><code class="language-xml">&lt;map&gt;
     &lt;entry key="a" value="b" /&gt;
 &lt;/map&gt;
 </code></pre>
-      <p>or</p>
+	<p>or</p>
 <pre class="prettyprint"><code class="language-xml">&lt;map&gt;
     &lt;entry&gt;
         &lt;key&gt;
@@ -301,128 +298,73 @@
     &lt;/entry&gt;
 &lt;/map&gt;
 </code></pre>
-      <p>&nbsp;</p>
-      <p>The value of a map key or value, or a set value, can also again be any of the following elements:
-        <br>
-      bean | ref | idref | list | set | map | props | value | null </p>
-      <p>If you need to refer to this outside a &lt;bean /&gt; or  need to specify list/set/map type, use util namespace (i.e. util:list)</p>
-      <p>Example   <br>
-      </p>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: xml">
-/*<![CDATA[ 
-<util:list id="beanList" list-class="java.util.LinkedList">
-    <ref bean="one" />
-</util:list>
-]]>*/
-      </script>
-      </div>
-      <p>&nbsp;</p>
-      <p>Use the &quot;parent&quot; attribute to inherit (and  merge entries) from a parent collection.</p>
-      <p>Strongly typed collections</p>
-      <ul>
-        <li>Entries will be converted to the appropriate  type prior to being added to the Collection</li>
-      </ul>
-      <h4>1.4.3 How to create an ApplicationContext? </h4>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: java">
-/*<![CDATA[ 
-ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");
-]]>*/
-      </script>
-      </div>
-      <p><br>
-        Supports multiple resources<br>
-      </p>
-      <h4>1.4.4 What are the resource prefixes that can be used? </h4>
-      <p>classpath:<br>
-        file:<br>
-        http:</p>
-      <h4>1.4.5 How to refer to a Spring configuration file inside a package? </h4>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: java">
-/*<![CDATA[ 
-new ClasspathXmlApplicationContext("/com/mine/app-config.xml");
-]]>*/
-      </script>
-      </div>
-      <p>&nbsp;</p>
-      <h4>1.4.6 The different implementations of ApplicationContext that can be used  in an application</h4>
-      <p>ClasspathXmlApplicationContext </p>
-      <ul>
-        <li>Defaults to classpath:</li>
-        <li>Starts looking from root of classpath regardless  of whether specify &quot;/&quot;</li>
-      </ul>
-      <p>FileSystemXmlApplicationContext </p>
-      <ul>
-        <li>Defaults to file:</li>
-        <li>Uses relative path even if specify  &quot;/&quot;, but &quot;file:/mine&quot; forces an absolute path</li>
-      </ul>
-      <p>XmlWebApplicationContext </p>
-      <ul>
-        <li>Defaults to file: in  /WEB-INF/applicationContext.xml</li>
-        <li>Uses path relative to web application</li>
-      </ul>
-      <h4>1.4.7 How to externalize constants from a Spring XML configuration file  into a .properties file?</h4>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: xml">
-/*<![CDATA[ 
-<context:property-placeholder location="/myFile.properties" />
-]]>*/
-      </script>
-      </div>
-      <p>&nbsp;</p>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: xml">
-/*<![CDATA[ 
-<bean id="mind" class="Mine">
-    <property  name="a" value="${myProperty}" />
-</bean>
-]]>*/
-      </script>
-      </div>
-      <p>&nbsp;</p>
-      <h4>1.4.8 Purpose and usage of bean definition inheritance</h4>
-      <p>Extract common bean setup into one &quot;super&quot; bean  to reduce duplicate setup code<br>
-      </p>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: xml">
-/*<![CDATA[ 
-<bean  id="parentBean" class="MyClass" abstract="true"  />
-<bean  id="child" parent="parentBean"  class="MyDerivedClass"/>
-]]>*/
-      </script>
-      </div>
-      <p><br>
-        A bean without  a class or factory is implicitly abstract.</p>
-      <p>The &quot;abstract&quot; attribute is optional but good  practice as it prevents the bean from being instantiated by the container. </p>
-      <p>The parent class does not have to be abstract and can  still be instantiated using the new operator.</p>
-      <h4>1.4.9 How to use the p namespace?</h4>
-      <p>Set property as attributes<br>
-      </p>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: xml">
-/*<![CDATA[ 
-<bean  id="a" class="MyClass"  
-    p:propName1="value"
-    p:propName2-ref="otherBean"/>  
-]]>*/
-      </script>
-      </div>
-      <p>&nbsp; </p>
-      <h4>1.4.10 Difference between &quot;id&quot; and &quot;name&quot; attributes in  the &lt;bean&gt; tag </h4>
-      <p>Identifiers (id and/or name) must be unique within the  container that hosts the bean.</p>
-      <p>Id </p>
-      <ul>
-        <li>Must be unique </li>
-        <li>Limits the characters that are legal </li>
-      </ul>
-      <p>Name </p>
-      <ul>
-        <li>Can specify multiple names separated by comma,  semicolon or space</li>
-        <li>Allows more characters in name such as slashes</li>
-      </ul>
-      <p>You are not required to supply a name or id for a bean.  If no name or id is supplied explicitly, the container generates a unique name  for that bean. However, if you want to refer to that bean by name you must  provide a name.</p>
+	<ul>
+		<li>The value of a map key or value, or a set value, can also again be any of the following elements: bean | ref | idref | list | set | map | props | value | null</li>
+		<li>If you need to refer to this outside a &lt;bean /&gt; or  need to specify list/set/map type, use util namespace (i.e. util:list)</li>
+		<li>Use the &quot;parent&quot; attribute to inherit (and  merge entries) from a parent collection.</li>
+		<li>Strongly typed collections - Entries will be converted to the appropriate  type prior to being added to the Collection</li>
+	</ul>
+	<h4>1.4.3 How to create an ApplicationContext? </h4>
+<pre class="prettyprint"><code class="language-java">ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");</code></pre>
+	<p>Supports multiple resources</p>
+	<h4>1.4.4 What are the resource prefixes that can be used? </h4>
+	<ul>
+		<li>classpath:</li>
+		<li>file:</li>
+		<li>http:</li>
+	</ul>
+	<h4>1.4.5 How to refer to a Spring configuration file inside a package? </h4>
+<pre class="prettyprint"><code class="language-java">new ClasspathXmlApplicationContext("/com/mine/app-config.xml");</code></pre>
+	<h4>1.4.6 The different implementations of ApplicationContext that can be used  in an application</h4>
+	<ul><strong>ClasspathXmlApplicationContext</strong>
+		<li>Defaults to classpath:</li>
+		<li>Starts looking from root of classpath regardless  of whether specify &quot;/&quot;</li>
+	</ul>
+	<ul><strong>FileSystemXmlApplicationContext</strong>
+		<li>Defaults to file:</li>
+		<li>Uses relative path even if specify  &quot;/&quot;, but &quot;file:/mine&quot; forces an absolute path</li>
+	</ul>
+	<ul><strong>XmlWebApplicationContext</strong>
+		<li>Defaults to file: in  /WEB-INF/applicationContext.xml</li>
+		<li>Uses path relative to web application</li>
+	</ul>
+	<h4>1.4.7 How to externalize constants from a Spring XML configuration file  into a .properties file?</h4>
+<pre class="prettyprint"><code class="language-xml">&lt;context:property-placeholder location="/myFile.properties" /&gt;</code></pre>
+	Usage XML:
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="mind" class="Mine"&gt;
+	&lt;property  name="a" value="${myProperty}" /&gt;
+&lt;/bean&gt;</code></pre>
+	Usage annotation:
+<pre class="prettyprint"><code class="language-java">@Value("${myProperty}")
+private String value;</code></pre>
+	<h4>1.4.8 Purpose and usage of bean definition inheritance</h4>
+      <p>Extract common bean setup into one &quot;super&quot; bean  to reduce duplicate setup code</p>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="parentBean" class="MyClass" abstract="true" /&gt;
+&lt;bean id="child" parent="parentBean" class="MyDerivedClass"/&gt;
+</code></pre>
+	<ul>
+		<li>A bean without  a class or factory is implicitly abstract.</li>
+		<li>The &quot;abstract&quot; attribute is optional but good  practice as it prevents the bean from being instantiated by the container.</li>
+		<li>The parent class does not have to be abstract and can  still be instantiated using the new operator.</li>
+	</ul>
+	<h4>1.4.9 How to use the p namespace?</h4>
+	<p>Set property as attributes</p>
+<pre class="prettyprint"><code class="language-xml">&lt;beans ...  xmlns:p="http://www.springframework.org/schema/p"&gt;
+&lt;bean id="foo" class="x.y.Foo" 
+	<strong>p:value</strong>="my value" -- literal value
+	<strong>p:service-ref</strong>="myService"/&gt; -- bean reference
+</code></pre>
+	<h4>1.4.10 Difference between &quot;id&quot; and &quot;name&quot; attributes in  the &lt;bean&gt; tag </h4>
+	<p>Identifiers (id and/or name) must be unique within the container that hosts the bean.</p>
+	<ul><strong>Id</strong>
+		<li>Must be unique </li>
+		<li>Limits the characters that are legal </li>
+	</ul>
+	<ul><strong>Name</strong>
+		<li>Can specify multiple names separated by comma,  semicolon or space</li>
+		<li>Allows more characters in name such as slashes</li>
+	</ul>
+	<p>You are not required to supply a name or id for a bean.  If no name or id is supplied explicitly, the container generates a unique name  for that bean. However, if you want to refer to that bean by name you must  provide a name.</p>
       <h4>1.4.11 Purpose of the &lt;aop:scoped-proxy/&gt; tag</h4>
       <p>If need to inject a bean with request/session scope into  a bean with singleton scope,  the proxy  intercepts it and makes sure you get the right bean for each call. </p>
       <p> </p>
