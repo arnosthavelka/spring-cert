@@ -304,18 +304,18 @@
 		<li>Use the &quot;parent&quot; attribute to inherit (and  merge entries) from a parent collection.</li>
 		<li>Strongly typed collections - Entries will be converted to the appropriate  type prior to being added to the Collection</li>
 	</ul>
-	<h4>1.4.3 How to create an ApplicationContext? </h4>
+	<h4>1.4.3-1 How to create an ApplicationContext? </h4>
 <pre class="prettyprint"><code class="language-java">ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");</code></pre>
 	<p>Supports multiple resources</p>
-	<h4>1.4.4 What are the resource prefixes that can be used? </h4>
+	<h4>1.4.3-2 What are the resource prefixes that can be used? </h4>
 	<ul>
 		<li>classpath:</li>
 		<li>file:</li>
 		<li>http:</li>
 	</ul>
-	<h4>1.4.5 How to refer to a Spring configuration file inside a package? </h4>
+	<h4>1.4.3-3 How to refer to a Spring configuration file inside a package? </h4>
 <pre class="prettyprint"><code class="language-java">new ClasspathXmlApplicationContext("/com/mine/app-config.xml");</code></pre>
-	<h4>1.4.6 The different implementations of ApplicationContext that can be used  in an application</h4>
+	<h4>1.4.3-4 The different implementations of ApplicationContext that can be used in an application</h4>
 	<ul><strong>ClasspathXmlApplicationContext</strong>
 		<li>Defaults to classpath:</li>
 		<li>Starts looking from root of classpath regardless  of whether specify &quot;/&quot;</li>
@@ -328,7 +328,8 @@
 		<li>Defaults to file: in  /WEB-INF/applicationContext.xml</li>
 		<li>Uses path relative to web application</li>
 	</ul>
-	<h4>1.4.7 How to externalize constants from a Spring XML configuration file  into a .properties file?</h4>
+	<h4>1.4.4 How to externalize constants from a Spring XML configuration file  into a .properties file?</h4>
+	<font color='blue' size="4">context:property-placeholder</font>
 <pre class="prettyprint"><code class="language-xml">&lt;context:property-placeholder location="/myFile.properties" /&gt;</code></pre>
 	Usage XML:
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="mind" class="Mine"&gt;
@@ -337,7 +338,18 @@
 	Usage annotation:
 <pre class="prettyprint"><code class="language-java">@Value("${myProperty}")
 private String value;</code></pre>
-	<h4>1.4.8 Purpose and usage of bean definition inheritance</h4>
+	<font color='blue' size="4">util:properties</font>
+		<p>Configuration:</p>
+<pre class="prettyprint"><code class="language-xml">&lt;util:properties id="myProperties" location=&quot;property file&quot; /&gt;
+</code></pre>
+	<p>Usage:</p>
+<pre class="prettyprint"><code class="language-java">@Value("#{myProperties[myPropName]}") -- specify property file and configuration item
+private String myField; 
+
+@Value("#{myPropName}") -- if there is only one property file
+private String myField; 
+</code></pre>
+	<h4>1.4.5 Purpose and usage of bean definition inheritance</h4>
       <p>Extract common bean setup into one &quot;super&quot; bean  to reduce duplicate setup code</p>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="parentBean" class="MyClass" abstract="true" /&gt;
 &lt;bean id="child" parent="parentBean" class="MyDerivedClass"/&gt;
@@ -347,85 +359,69 @@ private String value;</code></pre>
 		<li>The &quot;abstract&quot; attribute is optional but good  practice as it prevents the bean from being instantiated by the container.</li>
 		<li>The parent class does not have to be abstract and can  still be instantiated using the new operator.</li>
 	</ul>
-	<h4>1.4.9 How to use the p namespace?</h4>
+	<h4>1.4.6 How to use the p namespace?</h4>
 	<p>Set property as attributes</p>
 <pre class="prettyprint"><code class="language-xml">&lt;beans ...  xmlns:p="http://www.springframework.org/schema/p"&gt;
 &lt;bean id="foo" class="x.y.Foo" 
 	<strong>p:value</strong>="my value" -- literal value
 	<strong>p:service-ref</strong>="myService"/&gt; -- bean reference
 </code></pre>
-	<h4>1.4.10 Difference between &quot;id&quot; and &quot;name&quot; attributes in  the &lt;bean&gt; tag </h4>
-	<p>Identifiers (id and/or name) must be unique within the container that hosts the bean.</p>
-	<ul><strong>Id</strong>
-		<li>Must be unique </li>
-		<li>Limits the characters that are legal </li>
+	<h4><font color='brown'>1.4.x Difference between &quot;id&quot; and &quot;name&quot; attributes in  the &lt;bean&gt; tag</font></h4>
+	<p>Identifiers (id and/or name) must be unique within the container that hosts the bean. You are not required to supply a name or id for a bean.  If no name or id is supplied explicitly, the container generates a unique name  for that bean. However, if you want to refer to that bean by name you must  provide a name.</p>
+	<ul>
+		<li><strong>Id</strong> - must be unique (legal characters are limited)</li>
+		<li><strong>Name</strong> - can specify multiple names separated by comma,  semicolon or space (allows more characters in name such as slashes)</li>
 	</ul>
-	<ul><strong>Name</strong>
-		<li>Can specify multiple names separated by comma,  semicolon or space</li>
-		<li>Allows more characters in name such as slashes</li>
+	<h4><font color='brown'>1.4.x Purpose of the &lt;aop:scoped-proxy/&gt; tag</font></h4>
+	<p>If need to inject a bean with request/session scope into  a bean with singleton scope,  the proxy  intercepts it and makes sure you get the right bean for each call. </p>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="userPref" scope="session"&gt;
+	&lt;scoped-proxy/&gt;
+&lt;/bean&gt;
+
+&lt;bean ...&gt;
+	&lt;property ref="userPref"/&gt;
+&lt;/bean&gt;
+</code></pre>
+	<h4><font color='brown'>1.4.x How does FactoryBean work (Optional, From 2.5 sample questions)?</font></h4>
+	<ul>
+		<li>Class name in bean definition (in xml) is that of the factory</li>
+		<li>Setters called on the factory rather than the created bean</li>
+		<li>Bean id maps to type returned by factory's getObject() method</li>
+		<li>To get the actual FactoryBean instance from the container  and not the bean it produces, you preface the bean id with the ampersand symbol</li>
 	</ul>
-	<p>You are not required to supply a name or id for a bean.  If no name or id is supplied explicitly, the container generates a unique name  for that bean. However, if you want to refer to that bean by name you must  provide a name.</p>
-      <h4>1.4.11 Purpose of the &lt;aop:scoped-proxy/&gt; tag</h4>
-      <p>If need to inject a bean with request/session scope into  a bean with singleton scope,  the proxy  intercepts it and makes sure you get the right bean for each call. </p>
-      <p> </p>
-      <div class="code">
-        <script type="syntaxhighlighter" class="brush: xml">
-/*<![CDATA[ 
-<bean  id="userPref" scope="session">
-    <scoped-proxy/>
-</bean>
+<pre class="prettyprint"><code class="language-java">getBean(&quot;myBean&quot;) -- returns reference of bean created by FactoryBean
+getBean(&quot;&amp;myBean&quot;) -- returns reference of the FactoryBean instance itself
+</code></pre>
+	<h4><font color='brown'>1.4.x How to inject using a factory method?</font></h4>
+	<ul>
+		<li>Instance (non-static) factory method: specify  &quot;factory-bean&quot; and &quot;factory-method&quot; attributes</li>
+		<li>Static factory method: specify &quot;class&quot; and  &quot;factory-method&quot; attributes</li>
+	</ul>
+<pre class="prettyprint"><code class="language-xml">&lt;!-- the factory bean, which contains a method called createInstance() --&gt;
+&lt;bean id="serviceLocator" class="examples.DefaultServiceLocator"&gt;
+	&lt;!-- inject any dependencies required by this locator bean --&gt;
+&lt;/bean&gt;
 
-<bean ...>
-    <property ref="userPref"/>
-</bean>  
-]]>*/
-      </script>
-      </div>
-      <h4>1.4.12 How does FactoryBean work (Optional, From 2.5 sample questions)?</h4>
-      <p>Class name in bean definition (in xml) is that of the  factory</p>
-      <p>Setters called on the factory rather than the created  bean</p>
-      <p>Bean id maps to type returned by factory's getObject()  method</p>
-      <p>To get the actual FactoryBean instance from the container  and not the bean it produces, you preface the bean id with the ampersand symbol</p>
-      <p>Example </p>
-      <ul>
-        <li>Invoking getBean(&quot;myBean&quot;) on the  container returns the product of the FactoryBean</li>
-        <li>Invoking getBean(&quot;&amp;myBean&quot;)  returns the FactoryBean instance itself</li>
-      </ul>
-      <p>To get a bean programatically from the ApplicationContext:</p>
-      <ul>
-        <li>&lt;T&gt; T getBean(Class&lt;T&gt; requiredType) - Return the bean instance that uniquely matches the given object type, if any.</li>
-        <li> Object getBean(String name) - Return an instance, which may be shared or independent, of the specified bean.</li>
-      </ul>
-      <h4>1.4.13 How to inject using a factory method (Jeanne)?</h4>
-      <p>Instance (non-static) factory method: specify  &quot;factory-bean&quot; and &quot;factory-method&quot; attributes </p>
-      <p>Static factory method: specify &quot;class&quot; and  &quot;factory-method&quot; attributes  </p>
-      <p>Use &lt;constructor-arg&gt; to pass parameters</p>
-      <h4>1.4.14 How to use a PropertyEditor (Jeanne)?</h4>
-      <p>Extend PropertyEditorSupport and implement  setAsText(String text) and String getAsText()</p>
-      <h4>1.4.15 Splitting the XML (Jeanne)</h4>
-      <p>&lt;import resource=&quot;local path&quot; /&gt;</p>
-      <p>Prefer &quot;multiple resource locations&quot; as configs  are unaware of each other </p>
-      <p>Relative to the definition file</p>
-      <p>Use classpath:/.. or file:.. if need an absolute path</p>
-      <h4>1.4.16 Other util namespace items (Jeanne)</h4>
-      <p>&lt;util:constant static-field=&quot;fully qualified  name&quot; /&gt;</p>
-      <p>&lt;util:properties location=&quot;property file&quot;  /&gt;</p>
-      <h4>1.4.17 Spring EL (Jeanne)</h4>
-      <p> #{systemProperties.name}</p>
-      <h4>1.4.18 References to other beans (collaborators) (Gavin)   </h4>
-      <p>&lt;ref /&gt;<br>
-        Use the &quot;bean&quot;, &quot;local&quot; or the  &quot;parent&quot; attribute to control lookup context</p>
-      <p>Inner beans</p>
-      <ul>
-        <li>A &lt;bean/&gt; element inside the  &lt;property/&gt; or &lt;constructor-arg/&gt; elements defines a so-called  inner bean.</li>
-        <li>Anonymous prototypes (The &quot;scope&quot; flag  and any &quot;id&quot; or &quot;name&quot; attribute are effectively  ignored.)    </li>
-      </ul>
-      <p> </p>
-      <h4>1.4.19 Autowire (Gavin)</h4>
-      <p>Multiple matches</p>
-      <ul>
-        <li>Use &quot;autowire-candidate&quot; attribute,  &quot;default-autowire-candidates&quot; or &quot;primary&quot; attribute</li>
-      </ul>
-
+&lt;!-- the bean to be created via the factory bean --&gt;
+&lt;bean id="clientService"
+      factory-bean="serviceLocator"
+      factory-method="createClientServiceInstance"/&gt;
+</code></pre>
+	<h4><font color='brown'>1.4.x Splitting the XML</font></h4>
+	<ul>
+		<li>&lt;import resource=&quot;local path&quot; /&gt;, path is relative to the definition file</li>
+		<li>Prefer &quot;multiple resource locations&quot; as configs are unaware of each other</li>
+		<li>Use classpath:/.. or file:.. if need an absolute path</li>
+	</ul>
+	<h4><font color='brown'>1.4.x Use constants in configuration</font></h4>	
+	<p>XML:</p>
+<pre class="prettyprint"><code class="language-xml">&lt;util:constant id="maxInt" static-field="java.lang.Integer.MAX_VALUE"/&gt;
+</code></pre>
+	<p>Java:</p>
+<pre class="prettyprint"><code class="language-java">public class Foo {
+    @Value("T(java.lang.Integer).MAX_VALUE")
+    private Integer myValue;
+}
+</code></pre>
 </body>
 </html> 
