@@ -45,6 +45,7 @@
 	</ul>
 
 	<h2>Spring Framewwork 3.2 - Certification Study Notes</div></h2>
+
     <h3>1. Container</h3>
     <h3>1.1 General</h3>
     <h4>1.1.1 The potential advantages of using Spring's dependency injection?</h4>
@@ -103,7 +104,7 @@
 		<li>Web (request, session and global session)</li>
     </ul>
 
-	<h4>1.2 Lifecycle</h4>
+	<h3>1.2 Lifecycle</h3>
     <h4>1.2.1 How to declare an initialization method in a Spring bean?</h4>
 	<ul>
 		<li>XML: &lt;bean ... <strong>init-method</strong>="init"&gt;</li>
@@ -343,10 +344,10 @@ private String value;</code></pre>
 <pre class="prettyprint"><code class="language-xml">&lt;util:properties id="myProperties" location=&quot;property file&quot; /&gt;
 </code></pre>
 	<p>Usage:</p>
-<pre class="prettyprint"><code class="language-java">@Value("#{myProperties[myPropName]}") -- specify property file and configuration item
+<pre class="prettyprint"><code class="language-java">@Value("#{myProperties[myPropName]}") // specify property file and configuration item
 private String myField; 
 
-@Value("#{myPropName}") -- if there is only one property file
+@Value("#{myPropName}") // if there is only one property file
 private String myField; 
 </code></pre>
 	<h4>1.4.5 Purpose and usage of bean definition inheritance</h4>
@@ -423,5 +424,112 @@ getBean(&quot;&amp;myBean&quot;) -- returns reference of the FactoryBean instanc
     private Integer myValue;
 }
 </code></pre>
+
+	<h3>1.5 JavaConfig </h3>
+	<h4>1.5.1 Usage of the @Bean and @Configuration annotations</h4>
+	<p><strong>@Configuration</strong></p>
+	<ul>
+		<li>Declares a class to be a Spring's Java based configuration</li>
+		<li>Must have default constructor or none</li>
+	</ul>
+	<p><strong>@Bean</strong> - declares a method as spring bean (in a Java based configuration). Properties are:</p>
+	<ul>
+		<li>initMethod (redundant because can call method)</li>
+		<li>destroyMethod</li>
+		<li>name (aliases)</li>
+		<li>autowire (defaults to no)</li>
+	</ul>
+	<p>Other usefull annotations:</p>
+	<ul>
+		<li><strong>@Scope(&quot;prototype&quot;)</strong> - to change default (singleton) scope</li>
+		<li><strong>@Primary</strong> - indicates that a bean should be given preference when multiple candidates are qualified to autowire a single-valued dependency</li>
+		<li><strong>@DependsOn</strong> - beans on which the current bean depends</li>
+		<li><strong>@Import</strong> - to reference another @Configuration (you can't just call it directly as calls must be in the correct order in dependency graph)</li>
+		<li><strong>@ComponentScan("com.acme.app.services")</strong> - same as &lt;context:component-scan/&gt; in XML configuration</li>
+		<li><strong>@PropertySource("classpath:/com/acme/app.properties")</strong> - see example:
+<pre class="prettyprint"><code class="language-java">@Configuration
+@PropertySource("classpath:/com/acme/app.properties")
+public class AppConfig {
+    @Inject Environment env;
+    @Bean
+    public MyBean myBean() {
+        return new MyBean(env.getProperty("bean.name"));
+    }
+}
+</code></pre>
+		</li>
+	</ul>
+	<h4>1.5.2 How to write a bean definition method?</h4>
+<pre class="prettyprint"><code class="language-java">@Bean // Defines a String bean with the id &quot;myBean&quot; and  the value &quot;hi&quot;
+public String myBean() {
+	return &quot;hi&quot;;
+}
+</code></pre>
+
+	<h3>1.6 Testing</h3>
+	<font color='blue' size="4">Unit testing</font>
+	<ul>
+		<li>Mock Objects (JNDI, Servlet API, etc.)</li>
+		<li>Unit Testing support Classes (ReflectionTestUtils,  ModelAndViewAssert, etc.)</li>
+	</ul>
+	<font color='blue' size="4">Integration testing</font>
+	<ul>
+		<li>To manageSpring IoC container caching (by fixture) between test execution.</li>
+		<li>To provide Dependency Injection of test fixture instances.</li>
+		<li>To provide transaction management appropriate to integration testing.</li>
+		<li>To supply Spring-specific support classes that are useful in writing integration tests.</li>
+		<li>Support for JDBC, annotations, Spring MVC, etc.</li>
+	</ul>
+	<h4>1.6.1 How to use Spring's integration testing support in a JUnit 4 test?</h4>
+	<p>Annotations @RunWith(SpringJUnit4ClassRunner) and @ContextConfiguration provides the benefits of the TestContext framework</p>
+<pre class="prettyprint"><code class="language-java"><strong>@RunWith(SpringJUnit4ClassRunner.class)</strong>
+<strong>@ContextConfiguration("classpath:/META-INF/spring/hello-app-context.xml")</strong>
+public class HelloServiceDefaultTest {
+
+	@Autowired
+	private HelloService service;
+
+	@Test
+	public void testSimpleProperties() throws Exception {
+		assertNotNull(service);
+	}
+}
+</code></pre>
+	<p>Others:</p>
+	<ul>
+		<li>Annotation @ContextConfiguration uses sufix "-context.xml"to define default XML configuration, e.g. FooTest-context.xml for test FooTest.java</li>
+		<li>@ContextConfiguration(locations={&quot;config.xml&quot;}) - to define more XML configurations</li>
+		<li>@Autowire does not work on constructors</li>
+		<li>The context is cached across test fixtures  unless you use @DirtiesContext.</li>
+		<li>The &quot;inheritLocations&quot; attribute of  the annotation (default to true) inherits (appended to current list) the  super-classes locations</li>
+		<li>@WebAppConfiguration - to ensure that a WebApplicationContext is loaded for your test</li>
+		<li>@ContextHierarchy - to define a hierarchy of ApplicationContexts for integration tests
+<pre class="prettyprint"><code class="language-java">@WebAppConfiguration
+@ContextHierarchy({
+    @ContextConfiguration(classes = AppConfig.class),
+    @ContextConfiguration(classes = WebConfig.class)
+})
+public class WebIntegrationTests {
+    // class body...
+}
+</code></pre>
+		</li>
+	</ul>
+	<h4>1.6.2 How to declare that a test should run in a transaction in  spring-enabled JUnit 4?</h4>
+	<ul>
+		<li>By default, the framework will create and roll back a  transaction for each test.</li>
+		<li>@TransactionConfiguration - to override default rollback policy</li>
+		<li>@Transactional - on class or method, can set propagation/isolation/etc</li>
+		<li>@Rollback - on class or method</li>
+		<li>@BeforeTransaction (@Before is inside txn)</li>
+		<li>@AfterTransaction (@After is inside txn)</li>
+	</ul>
+	<h4>1.6.3 Differences between a Unit test and an Integration test. Which of them is supposed to interact with Spring?</h4>
+	<ul>
+		<li>Unit test tests one class in isolation with mocks.</li>
+		<li>Integration test tests multiple classes together.</li>
+		<li>Only integration tests interact with Spring.</li>
+	</ul>
+
 </body>
-</html> 
+</html>
