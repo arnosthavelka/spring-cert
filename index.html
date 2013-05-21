@@ -647,5 +647,70 @@ public void doAdvice(Exception ex)
 	<h4><font color='brown'>2.5.x How are aspects detected by Spring AOP?</font></h4>
 	<p>Use @Component (with class path scanning)  or register with: &lt;bean  id=&quot;myAspect&quot; class=&quot;org.xyz.NotVeryUsefulAspect&quot;&gt;...</p>
 	  
+	
+	<h3>3. Data Access and transactions</h3>
+	<h3>3.1 General</h3>
+	<h4>3.1.1 The rationale for having the DataAccessException hierarchy.</h4>
+	<ul>
+		<li>Runtime exception – doesn't force developers to  catch and rethrow</li>
+		<li>Consistent/non-vendor specific messages –  isolates from database</li>
+		<li>Clearer names – easy to catch and handle  specific errors</li>
+	</ul>
+	<h4>3.1.2 Definition  of a DataSource in the Spring configuration </h4>
+	<ul>
+		<li>JNDI:
+<pre class="prettyprint"><code class="language-xml">&lt;jee:jndi-lookup id=&quot;ds&quot; jndi-name=&quot;java:comp/env/jdbc/DS&quot; /&gt;
+</code></pre>
+		</li>
+		<li>Spring bean:
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"&gt;
+    &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
+    &lt;property name="url" value="${jdbc.url}"/&gt;
+    &lt;property name="username" value="${jdbc.username}"/&gt;
+    &lt;property name="password" value="${jdbc.password}"/&gt;
+&lt;/bean&gt;
+</code></pre>
+		</li>
+	</ul>
+	<h3>3.2 The JdbcTemplate </h3>
+	<h4>3.2.1 Usage of the JdbcTemplate with regards to exception handling </h4>
+	<p>JdbcTemplate:</p>
+	<ul>
+		<li>Stateful – it maintains a  reference to a DataSource, but this state is not conversational state</li>
+		<li>Thread-safe - once configured</li>
+		<li>SQL Exception is converted to DataAccessException hierarchy</li>
+		<li>Depends on datasource instance (JdbcTemplate jdbc = new JdbcTemplate(datasource);)</li>
+		<li>Use NamedParameterJdbcTemplate when want param names (i.e  &quot;... where x=:myparam&quot;) rather than classic placeholder (i.e  &quot;... where x=?&quot;)</li>
+		<li>Use SimpleJdbcTemplate (JDK 1.5) which delegates to  JDBCTemplate and makes use of some of the JDK 1.5 features (such as var-args)</li>
+	</ul>
+	<p>Spring and you:</p>
+	<ul>
+		<li>(You) Define  connection parameters.</li>
+		<li>(Spring) Open the connection.</li>
+		<li>(You) Specify the SQL statement.</li>
+		<li>(You) Declare parameters and provide parameter values.</li>
+		<li>(Spring) Prepare and execute the statement.</li>
+		<li>(Spring) Set up  the loop to iterate through the results (if any).</li>
+		<li>(You) Do the work for each iteration.</li>
+		<li>(Spring) Process any exception.</li>
+		<li>(Spring) Handle transactions.</li>
+		<li>(Spring) Close the connection, statement and resultset.</li>
+	</ul>
+	<p>Key methods:</p>
+	<ul>
+		<li>queryForInt | queryForLong - get concreate value (&quot;select count(*) from table&quot;);</li>
+		<li>queryForObject – convert to specified type </li>
+		<li>queryForMap – convert to a map with the column name as key</li>
+		<li>queryForList – list of maps (rows)</li>
+		<li>JdbcOperations – to allow invocation of less commonly used methods</li>
+	</ul>
+	<p>MEM:</p>
+	<ul>
+		<li>RowMapper – to handle mapping of rows returned from a REF cursor</li>
+		<li>RowCallbackHandler – when we need to write out data to file but not return it</li>
+		<li>ResultSetExtractor – extracts values from each row of a ResultSet into one entity</li>
+	</ul>
+
+	
 </body>
 </html>
