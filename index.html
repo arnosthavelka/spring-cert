@@ -702,7 +702,7 @@ public void doAdvice(Exception ex)
 		<li>queryForObject – convert to specified type </li>
 		<li>queryForMap – convert to a map with the column name as key</li>
 		<li>queryForList – list of maps (rows)</li>
-		<li>JdbcOperations – to allow invocation of less commonly used methods</li>
+		<li>getJdbcOperations – get interface to allow invocation of less commonly used methods</li>
 	</ul>
 	<p>MEM:</p>
 	<ul>
@@ -711,6 +711,51 @@ public void doAdvice(Exception ex)
 		<li>ResultSetExtractor – extracts values from each row of a ResultSet into one entity</li>
 	</ul>
 
-	
+	<p>Examples of data querying:</p>
+<pre class="prettyprint"><code class="language-java">// querying with parameters
+jdbc.queryFor____(String sql, Object[] args)
+jdbc.queryFor____("select count(*) from table where  col > ? and col < ?", new Object[] {10, 2}); 
+jdbc.queryFor____(String sql, Object... args) 
+
+
+// usage of mapping entity
+RowMapper<A> mapper = new RowMapper<A>() {
+    public A  mapRow(ResultSet rs, int row) throws SQLException {...}
+};
+jdbc.query(sql, mapper); // use with query (generally for a list)
+jdbc.queryForObject(sql, mapper); // load a single entity
+
+
+// usage of writting out data
+RowCallbackHandler handler = new RowCallbackHandler() {
+    public void  processRow(ResultSet rs) {...}
+};
+jdbc.query(sql, handler);
+
+
+// usage of mapping resultset into entity
+ResultSetExtractor<A> extractor = new  ResultSetExtractor<A>() {
+    public A extractData(ResultSet rs) {...};
+};
+jdbc.query(sql,  extractor);
+</code></pre>
+	<p>Examples of special operations:</p>
+<pre class="prettyprint"><code class="language-java">// querying for DML (insert/update/delete row)
+jdbc.update(sql);
+jdbc.update(PreparedStatementCreator, KeyHolder)
+
+
+// executing DDL
+jdbc.execute(sql);
+
+
+// executing batch update
+BatchPreparedStatementSetter setter = new  BatchPreparedStatementSetter() {
+    public void  setValues(PreparedStatement stmt, int row) {}
+    public int  getBatchSize() { return 0; }
+}
+jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
+</code></pre>
+
 </body>
 </html>
