@@ -757,5 +757,39 @@ BatchPreparedStatementSetter setter = new  BatchPreparedStatementSetter() {
 jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 </code></pre>
 
+	<h3>3.3 Hibernate</h3>
+	<h4>3.3.1 Configuration of a SessionFactoryBean in xml</h4>
+	<p>Instances:</p>
+	<ul>
+		<li><strong>LocalSessionFactoryBean</strong> - supports a list of Hibernate XML  mapping locations (use mappingLocations).
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="sf" class="os.orm.hibernate3.LocalSessionFactoryBean"&gt;
+    &lt;property name="dataSource" ref="d" /&gt;
+    &lt;property name="mappingLocations"&gt;
+        &lt;list&gt;
+            &lt;value&gt;classpath:/package/hbm.xml&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property>
+&lt;/bean> 
+</code></pre>
+		</li>
+		<li><strong>AnnotationSessionFactoryBean</strong> - extends LocalSessionFactoryBean and adds support
+			<ul>
+				<li><strong>annotatedClasses</strong> - for a list of annotated classes</li>
+				<li><strong>packagesToScan</strong> - for packages to scan</li>
+			</ul>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="sf" class="os.orm.hibernate3.annotation.AnnotationSessionFactoryBean"&gt;
+    &lt;property name="dataSource" ref="d" /&gt;
+    &lt;property name="annotatedClasses"&gt;
+        &lt;list&gt;
+            &lt;value&gt;Class1&lt;/value&gt;
+            &lt;value&gt;Class2&lt;/value&gt;
+        &lt;/list&gt;
+    &lt;/property>
+&lt;/bean> 
+</code></pre>
+		</li>
+	</ul>
+	<p>Read only transactions prevent Hibernate from flushing session.</p>
+
 </body>
 </html>
