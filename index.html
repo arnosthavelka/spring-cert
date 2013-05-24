@@ -774,7 +774,7 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 		</li>
 		<li><strong>AnnotationSessionFactoryBean</strong> - extends LocalSessionFactoryBean and adds support
 			<ul>
-				<li><strong>annotatedClasses</strong> - for a list of annotated classes</li>
+				<li><strong>annotatedClasses</strong> - for a list of annotated classes (wildcards are not supported)</li>
 				<li><strong>packagesToScan</strong> - for packages to scan</li>
 			</ul>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="sf" class="os.orm.hibernate3.annotation.AnnotationSessionFactoryBean"&gt;
