@@ -784,12 +784,86 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
             &lt;value&gt;Class1&lt;/value&gt;
             &lt;value&gt;Class2&lt;/value&gt;
         &lt;/list&gt;
-    &lt;/property>
-&lt;/bean> 
+    &lt;/property&gt;
+&lt;/bean&gt;
 </code></pre>
 		</li>
 	</ul>
 	<p>Read only transactions prevent Hibernate from flushing session.</p>
+
+	
+	<h3>3.4 Transactions </h3>
+	<h4>3.4.1 Configuration to declare a local transaction manager</h4>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="mgr" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"&gt;
+    &lt;property  name="dataSource" ref="dataSource"/&gt;
+&lt;/bean&gt;
+</code></pre>
+	<ul>
+		<li><strong>HibernateTransactionManager</strong> - supports Hibernate and JDBC</li>
+		<li><strong>JdbcTransactionManager</strong> - only supports JDBC</li>
+		<li><strong>JpaTransactionManager</strong> - supports JPA and JDBC</li>
+		<li>etc.</li>
+	</ul>
+	<h4>3.4.2 Configuration to declare a JTA transaction manager</h4>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id=&quot;mgr&quot; class=&quot;org.springframework.transaction.jta.JtaTransactionManager&quot;&gt;
+    &lt;property  name="dataSource" ref="dataSource"/&gt;
+&lt;/bean&gt;
+</code></pre>
+	<p>or</p>
+<pre class="prettyprint"><code class="language-xml">&lt;tx:jta-transaction-manager /&gt;
+</code></pre>
+	<h4>3.4.3 The different ways to do declarative transaction management with Spring (xml, annotations)</h4>
+    <p>We have to define transaction manager first (see previous chapters).</p>
+	<font color='blue' size="4">XML</font>
+<pre class="prettyprint"><code class="language-xml">&lt;aop:config&gt;
+    &lt;aop:advisor  pointcut-ref="p" advice-ref="ta" /&gt;
+&lt;/aop:config&gt;
+
+&lt;tx:advice  id="ta"&gt;
+    &lt;tx:attributes&gt;
+        &lt;tx:method name="update*" timeout="60" /&gt;
+        &lt;tx:method name="*" timeout="30"  read-only="true" /&gt;
+    &lt;/tx:attributes&gt;
+&lt;/tx:advice&gt;
+</code></pre>
+	<font color='blue' size="4">Annotations</font>
+	<p>Use annotation <strong>@Transactional</strong> as:</p>
+	<ul>
+		<li>applicable on public methods or class</li>
+		<li>not applicable on non-public methods - there will be no error, but no transaction will be applied</li>
+		<li>not recommend on interfaces b/c not all proxies will take them</li>
+	</ul>
+	<h4>3.4.4 Usage of TransactionTemplate for programmatic transaction management  (you simply need to understand a basic example based on the TransactionTemplate).</h4>
+	<ul>
+		<li>Takes transaction manager in constructor</li>
+		<li>Passes TransactionStatus to TransactionCallback which lets you call status.setRollbackOnly()</li>
+	</ul>
+	<p>Example:</p>
+<pre class="prettyprint"><code class="language-java">public Object  someServiceMethod() {
+    return  transactionTemplate.execute(new TransactionCallback() {
+        public Object  doInTransaction(TransactionStatus status) {
+            updateOperation1();
+            return  resultOfUpdateOperation2();
+        }
+    });
+}
+</code></pre>
+	<h4>3.4.5 Transactions and exception management: what is the default rollback policy? Can it be overridden?</h4>
+	<ul>
+		<li>Default policy is rollback for a RuntimeException.</li>
+		<li>Default policy can be overriden - for the @Transactional annotation, specify <strong>rollbackFor</strong> or <strong>noRollbackFor</strong> when passing Class or rollbackForClassname/noRollbackForClassname when passing Strings.</li>
+	</ul>
+	<h4>3.4.6 The @Transactional annotation: what are the main attributes that can be used for a transaction definition? Can this annotation also be used with a JTA Transaction Manager?</h4>
+	<p>Main attributes of @Transactional annotation are:</p>
+	<ul>
+		<li><strong>timeout</strong> - specified in seconds</li>
+		<li><strong>readOnly</strong> - true or false</li>
+		<li><strong>isolation</strong> - Isolation.READ_UNCOMMITTED, READ_COMMITTED,  REPEATABLE_READ or SERIALIZABLE</li>
+		<li><strong>propagation</strong> - Propagation.REQUIRES_NEW, REQUIRED, etc.</li>
+		<li><strong>rollbackFor</strong> or <strong>rollbackForClassname</strong> - list of exceptions</li>
+		<li><strong>noRollbackFor</strong> or <strong>noRollbackForClassname</strong> - list of exceptions</li>
+	</ul>
+    <p>Yes, @Transactional annotation can be used with JTA Transaction Manager.</p>
 
 </body>
 </html>
