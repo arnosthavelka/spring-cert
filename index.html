@@ -865,5 +865,56 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 	</ul>
     <p>Yes, @Transactional annotation can be used with JTA Transaction Manager.</p>
 
+	<h4>3.4.7 Regarding propagation modes, what is the difference between PROPAGATION_REQUIRED and PROPAGATION_REQUIRES_NEW</h4>
+	<p>Main attributes of @Transactional annotation are:</p>
+	<ul>
+		<li><strong>REQUIRED</strong> (default) - If there’s an existing transaction in progress,  the current method should run within this transaction. Otherwise, it should start a new transaction and  run within its own transaction.</li>
+		<li><strong>REQUIRES_NEW</strong> - The current method must start a new transaction  and run within its own transaction. If there’s an existing transaction in progress,  it should be suspended.</li>
+		<li><strong>SUPPORTS</strong> - If there’s an existing transaction in progress,  the current method can run within this transaction. Otherwise, it is not necessary to run within a  transaction.</li>
+		<li><strong>NOT_SUPPORTED</strong> - The current method should not run within a  transaction. If there’s an existing transaction in progress,  it should be suspended.</li>
+		<li><strong>MANDATORY</strong> - The current method must run within a  transaction. If there’s no existing transaction in progress,  an exception will be thrown.</li>
+		<li><strong>NEVER</strong> - The current method should not run within a  transaction. If there’s an existing transaction in progress,  an exception will be thrown.</li>
+		<li><strong>NESTED</strong> (unique Spring feature) - If there’s an existing transaction in progress,  the current method should run within the nested transaction (supported by the  JDBC 3.0 save point feature) of this transaction. Otherwise, it should start a new transaction and  run within its own transaction.</li>
+	</ul>
+	<p>MEM: If methodA calls methodB directly, the transaction  attributes of methodB are NOT used (due to proxy issue).</p>
+
+	<h4>3.4.12 Regarding isolation levels, what is the difference between  READ_COMMITTED and READ_UNCOMMITTED?</h4>
+	<p>Read phenomena:</p>
+	<ul>
+		<li>
+			<strong>Dirty reads</strong> (Uncommitted Dependency) - A dirty read occurs when a transaction is allowed to read data from a row that has been modified by another running transaction and not yet committed.
+			<ul>
+				<li>T1 Read</li>
+				<li>T2 Update</li>
+				<li>T1 Read  will be temporary and invalid.</li>
+				<li>T2 Rollback</li>
+			</ul>
+		</li>
+		<li>
+			<strong>Nonrepeatable read</strong> - A non-repeatable read occurs, when during the course of a transaction, a row is retrieved twice and the values within the row differ between reads.
+			<ul>
+				<li>T1 Read</li>
+				<li>T2 Update</li>
+				<li>T1 Read  value will be different</li>
+			</ul>
+		</li>
+		<li>
+			<strong>Phantom read</strong> - A phantom read occurs when, in the course of a transaction, two identical queries are executed, and the collection of rows returned by the second query is different from the first.
+			<ul>
+				<li>T1 Read</li>
+				<li>T2 Insert</li>
+				<li>T1 Read  will contain additional rows.</li>
+			</ul>
+		</li>
+	</ul>
+	<p>The options to solve the read phenomena are:</p>
+	<ul>
+		<li><strong>DEFAULT</strong> - Uses the default isolation level of the underlying database. For most databases, the default isolation level is READ_COMMITTED.</li>
+		<li><strong>READ_UNCOMMITTED</strong> - Allows a transaction to read uncommitted changes by other transactions. The dirty read, nonrepeatable read, and phantom read problems may occur.</li>
+		<li><strong>READ_COMMITTED</strong> - Allows a transaction to read only those changes that have been committed by other  transactions. The dirty read problem can be avoided, but the nonrepeatable read and phantom read  problems may still occur.</li>
+		<li><strong>REPEATABLE_READ</strong> - Ensures that a transaction can read identical values from a field multiple times. For the duration of this transaction, updates made by other transactions to this field are  prohibited. The dirty read and nonrepeatable read problems can be avoided, but the phantom read  problem may still occur.</li>
+		<li><strong>SERIALIZABLE</strong> - Ensures that a transaction can read identical rows from a table multiple times. For the duration of this transaction, inserts, updates, and deletes made by other transactions to this table are prohibited. All the  concurrency problems can be avoided, but the performance will be low.</li>
+	</ul>
+	
 </body>
 </html>
