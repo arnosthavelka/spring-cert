@@ -916,7 +916,7 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 		<li><strong>SERIALIZABLE</strong> - Ensures that a transaction can read identical rows from a table multiple times. For the duration of this transaction, inserts, updates, and deletes made by other transactions to this table are prohibited. All the  concurrency problems can be avoided, but the performance will be low.</li>
 	</ul>
 	
-	<h1>4. Spring MVC and REST </h1>
+	<h1>4. Spring MVC</h1>
 	<h3>4.1 General configuration </h3>
 	<ul>
 		<li>&lt;mvc:annotation-driven /&gt; - Registers the DefaultAnnotationHandlerMapping  and AnnotationMethodHandlerAdapter beans that are required for Spring MVC to dispatch requests to @Controllers.</li>
@@ -1058,9 +1058,57 @@ public String findOwner(@RequestParam("ownerId")  String ownerId, Model model) {
 	<p>Yes</p>
 	<ul>
 		<li>If you specify a multipart file resolver, the request is  inspected for multiparts.</li>
-		<li>If multiparts are found, the request is wrapped in a  MultipartHttpServletRequest for further processing by other elements in the  process.</li>
+		<li>If multiparts are found, the request is wrapped in a  MultipartHttpServletRequest for further processing by other elements in the process.</li>
 		<li>In the controller, use:  @RequestParam(&quot;myParam&quot;) MultipartFile file</li>
 	</ul>
+	<h3><font color='brown'>4.3 REST</font></h3>
+	<h4><font color='brown'>4.3.1 Differences between GET, POST, PUT and DELETE</font></h4>
+	<p>@RequestMapping defines URI to resource, action (what to do with the resource) is defined by HTTP method:</p>
+	<ul>
+		<li>GET = select (read only)</li>
+		<li>POST = create</li>
+		<li>PUT = update</li>
+		<li>DELETE = delete</li>
+	</ul>
+	<h4><font color='brown'>4.3.2 Usage of the @PathVariable annotation</font></h4>
+	<p>Maps parts of the url in @RequestMapping to a  parameter. For example the URL /account/{id} goes with @PathVariable id in the method signature. See URI template in chapter 4.2.2</p>
+	<h4><font color='brown'>4.3.3 What is the RestTemplate?</font></h4>
+	<p>Programmatic client for calling RESTful URLs.</p>
+<pre class="prettyprint"><code class="language-java">String result =  restTemplate.getForObject(&quot;http://example.com/hotels/{hotel}/bookings/{booking}&quot;, String.class,&quot;42&quot;, &quot;21&quot;);
+RestTemplate t = new RestTemplate();
+t.getForObject(uri, MyResponse.class, id);
+t.postForObject(url, request, MyResponse.class, var1,  var2) or t.postForLocation(url, request, var1, var2)
+t.put(uri, mine);
+t.delete(uri);
+</code></pre>
+	<h4><font color='brown'>4.3.4 Purpose of the @ResponseStatus Annotation</font></h4>
+	<ul>
+		<li>Send an HTTP response code with the response. For example, @ResponseStatus(HttpStatus.CREATED).</li>
+		<li>If defined on the method, sends that header.</li>
+		<li>If defined on an exception, only sends if that error occurs.</li>
+		<li>An empty body can be used for REST so no view is used.</li>
+		<li>Annotation can go on @RequestMapping method or an exception class.</li>
+	</ul>
+	<h4><font color='brown'>4.3.5 Purpose of the @ExceptionHandler Annotation</font></h4>
+	<ul>
+		<li>Specify which method is invoked when an exception of a specific type is thrown during the execution of controller methods</li>
+		<li>If cannot annotate the actual exception, defines a response status in controller.</li>
+	</ul>
+	<p>For example:</p>
+	<ul>
+		<li>@ResponseStatus(HttpStatus.NOT_FOUND)</li>
+		<li>@ExceptionHandler({MyException.class})</li>
+	</ul>
+	<h4><font color='brown'>4.3.6 What are HttpMessageConverters?</font></h4>
+	<ul>
+		<li>HttpMessageConverter to convert to / from HTTP</li>
+		<li>Objects passed to and returned from the methods getForObject(), postForLocation(), and put() are converted to HTTP requests and  from HTTP responses by HttpMessageConverters.</li>
+		<li>Concrete implementations for the main media (mime) types  are provided in the framework and are registered by default with the  RestTemplate on the client-side and with AnnotationMethodHandlerAdapter on the  server-side.</li>
+		<li>Use @RequestBody to map params, use @ResponseBody to map return value</li>
+	</ul>
+
+	<h3>5. Advanced topics </h3>
+	<h4>5.1 Remoting </h4>
 
 </body>
 </html>
