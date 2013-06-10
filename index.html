@@ -968,6 +968,99 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 		<li>DispatcherServletApplicationContext can see the root context's configuration, but the root context can not see DispatchServletApplicationContext.</li>
 		<li>DispatchServletApplicationContext can override root context beans</li>
 	</ul>
-	
+
+	<h3>4.2 Controllers </h3>
+	<h4>4.2.1 Bootstrapping a root WebApplicationContext using the ContextLoaderListener</h4>
+      <p>The <strong>DispatcherServlet</strong> takes a contextConfigLocation  parameter in the web.xml or uses the default of <strong>${servlet_name}-servlet.xml</strong>. We need (to configure DispatcherServlet properly) to do:</p>
+	<ul>
+		<li>Define listener so it loads the root ApplicationContext before initializing the servlet as:
+<pre class="prettyprint"><code class="language-xml">&lt;listener&gt;
+    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+&lt;/listener&gt;
+</code></pre>
+		</li>
+		<li>Define servlet as:
+<pre class="prettyprint"><code class="language-xml">&lt;servlet&gt;
+	&lt;servlet-name&gt;mvc-dispatcher&lt;/servlet-name&gt;
+	&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+	&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
+
+&lt;servlet-mapping&gt;
+	...
+&lt;/servlet-mapping&gt;
+</code></pre>
+		</li>
+		<li>Default configuration file is <strong>/WEB-INF/applicationContext.xml</strong> or it can be overriden by:
+<pre class="prettyprint"><code class="language-xml">&lt;context-param&gt;
+    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+    &lt;param-value&gt;/WEB-INF/court-service.xml&lt;/param-value&gt;
+&lt;/context-param&gt;
+</code></pre>
+		</li>
+	</ul>
+	<h4>4.2.2 General usage of the @Controller and @RequestMapping annotations</h4>
+	<ul>
+		<li><strong>@Controller</strong> - annotates a class containing @RequestMapping on methods  returning ModelAndView, String, void, etc.</li>
+		<li><strong>@RequestMapping</strong>:
+			<ul>
+				<li>Takes value of path of URL to match on method level and optionally class level adding slashes as needed.</li>
+				<li>Combined, they form the absolute URL path including Ant style wildcards.</li>
+				<li>Can also restrict by type or filter by params/headers (e.g. method=RequestMethod.GET)</li>
+				<li>You can declare @RequestMapping on both the class/method  level or just the method level. The method level is key because it tells Spring  the method can handle requests.</li>
+			</ul>
+		</li>
+	</ul>
+	<p>Example of mapping &quot;/appointments/new&quot; to getNewForm() (for only GET):</p>
+<pre class="prettyprint"><code class="language-java">@Conttroller
+@RequestMapping("/appointments")                              
+public class  AppointmentsController {...
+    @RequestMapping(value="/new", method =  RequestMethod.GET)
+    public  AppointmentForm getNewForm() {...}
+}
+</code></pre>
+	<font color='blue' size="4">URI Template</font>
+	<ul>
+		<li>Ant syle globs:  @RequestMapping(&quot;/myPath/*/pets/{petId}&quot;)</li>
+		<li>Parameter conditions: @RequestMapping(value =  &quot;/pets/{petId}&quot;, params=&quot;myParam=myValue&quot;)</li>
+		<li>Header conditions: @RequestMapping(value =  &quot;/pets&quot;, method = RequestMethod.POST,  headers=&quot;content-type=text/*&quot;)</li>
+	</ul>
+<pre class="prettyprint"><code class="language-java">@RequestMapping(value="/owners/{ownerId}",  method=RequestMethod.GET)
+public String findOwner(@PathVariable("ownerId")  String ownerId, Model model) {
+</code></pre>
+	<h4>4.2.3 A method annotated with @RequestMapping can return a String. What does it refer to? What are the main parameter types that this method can accept? (based  on what you've seen in the class)</h4>
+	<ul>
+		<li>A method annotated with @RequestMapping returns: the view name - i.e. logical name of the view (to be deteremined by view resolver). For example, one can add a prefix/suffix to all strings returned, void (if the method handles the response directly), etc.</li>
+		<li>Main parameter types of @RequestMapping method:
+			<ul>
+				<li><strong>Servlet API</strong> - HttpSession, HttpServletRequest,  HttpServletResponse</li>
+				<li><strong>Stream</strong> - InputStream, Reader, OutputStream, Writer</li>
+				<li><strong>Annotated</strong> - @PathVariable, @RequestParam, @RequestHeader,  @RequestBody</li>
+				<li><strong>Model</strong> - Map, Model, ModelMap</li>
+				<li><strong>Other</strong> - Command or Form objects, Errors, SessionStatus</li>
+			</ul>
+		</li>
+	</ul>
+	<p>MEM: Method can not return absolute path to view.</p>
+	<h4>4.2.4 Goal of the @RequestParam annotation</h4>
+	<ul>
+		<li>To map request parameters to method parameters for use in the controller's methods.</li>
+		<li>Can pass parameter name if doesn't match one in method.</li>
+	</ul>
+<pre class="prettyprint"><code class="language-java">@RequestMapping(method=RequestMethod.GET)
+public String findOwner(@RequestParam("ownerId")  String ownerId, Model model) {
+</code></pre>
+	<h4><font color='brown'>4.2.x-1 Configuring Spring MVC via XML</font></h4>
+<pre class="prettyprint"><code class="language-xml">&lt;mvc:annotation-driven /&gt;
+&lt;mvc:interceptors  /&gt;
+</code></pre>
+	<h4><font color='brown'>4.2.x-2 Does Spring handle Multipart request?</font></h4>
+	<p>Yes</p>
+	<ul>
+		<li>If you specify a multipart file resolver, the request is  inspected for multiparts.</li>
+		<li>If multiparts are found, the request is wrapped in a  MultipartHttpServletRequest for further processing by other elements in the  process.</li>
+		<li>In the controller, use:  @RequestParam(&quot;myParam&quot;) MultipartFile file</li>
+	</ul>
+
 </body>
 </html>
