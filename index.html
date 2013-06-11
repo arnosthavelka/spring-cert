@@ -1109,6 +1109,70 @@ t.delete(uri);
 
 	<h3>5. Advanced topics </h3>
 	<h4>5.1 Remoting </h4>
+	<h4>5.1.1 Advantages of using Spring Remoting rather than plain RMI?</h4>
+	<ul>
+		<li>Hide plumbing/complexity</li>
+		<li>Support multiple protocols</li>
+		<li>Simplify things when both ends of remote call run Spring</li>
+	</ul>
+	<h4>5.1.2 Goal and general configuration of the RMI Service Exporter</h4>
+	<p>Goals:</p>
+	<ul>
+		<li>Handle server side of RMI interaction</li>
+		<li>Bind to registry</li>
+		<li>Expose endpoint (used for everything except EJB; EJB  already has mechanism to export remote)</li>
+	</ul>
+	<p>General configuration:<br>
+<pre class="prettyprint"><code class="language-xml">&lt;bean class="org.springframework.remoting.rmi.RmiServiceExporter"&gt;
+    &lt;property name="serviceName" value="AccountService"/&gt; &lt;!-- name in registry --&gt;
+    &lt;property name="service" ref="accountService"/&gt; &lt;!-- reference to POJO implementing  serviceInterface --&gt;
+    &lt;property name="serviceInterface" value="example.AccountService"/&gt; &lt;!-- interface classname --&gt;
+    &lt;property name="registryPort" value="1199"/&gt; &lt;!-- defaults to 1099 --&gt;
+&lt;/bean&gt;
+</code></pre>
+	<h4>5.1.3 Goal and general configuration of RMI Proxy Generator</h4>
+	<p>Goals:</p>
+	<ul>
+		<li>Handle client side of RMI interaction</li>
+		<li>Communicate with endpoint</li>
+		<li>Convert remote exception to runtime exception</li>
+		<li>Can treat remote EJBs as POJOs</li>
+	</ul>
+	<p>General configuration:<br>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean"&gt;
+    &lt;property name="serviceUrl" value="rmi://HOST:1199/AccountService"/&gt; &lt;!-- endpoint in registry (rmi://server:port/serviceName) --&gt;
+    &lt;property name="serviceInterface" value="example.AccountService"/&gt; &lt;!-- interface classname --&gt;
+&lt;/bean&gt;
+</code></pre>
+	<h4>5.1.4 Difference between the RMI Service Exporter and the HttpInvoker</h4>
+	<ul>
+		<li>HttpInvoker uses HTTP POST while RMI one uses RMI.</li>
+		<li>Bean classes to expose bean are HttpInvokerServiceExporter or RmiServiceExporter with the definition of service (reference to POJO implementing serviceInterface) and service interface  (interface classname).</li>
+		<li>Bean classes to connect bean are HttpInvokerProxyFactoryBean or RmiProxyFactoryBean with the definition of service URL (endpoint to the bean) and service interface  (interface classname).</li>
+		<li>The serviceName is specified as the name of the bean because default is to use BeanNameUrlHandlerMapping.</li>		
+	</ul>
+<pre class="prettyprint"><code class="language-xml">&lt;bean name="/AccountService" class="org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter"&gt;
+    &lt;property name="service" ref="accountService"/&gt; &lt;!-- reference to POJO implementing  serviceInterface --&gt;
+    &lt;property name="serviceInterface" value="example.AccountService"/&gt; &lt;!-- interface classname --&gt;
+&lt;/bean&gt;
+</code></pre>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="httpInvokerProxy" class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean"&gt;
+    &lt;property name="serviceUrl" value="http://remotehost:8080/remoting/AccountService"/&gt;
+    &lt;property name="serviceInterface" value="example.AccountService"/&gt; &lt;!-- interface classname --&gt;
+&lt;/bean&gt;
+</code></pre>
+	<h4>5.1.7 Does the HttpInvoker require to run a web server on the client side?  On the server side?</h4>
+	<p>Hessian (Caucho's binary-based format), Burlap (Caucho's XML-based format), HttpInvoker (spring's binary-based format) need a web server on the  server side, but not on the client side.</p>
 
+	<ul>
+		<li></li>
+	</ul>
+	<ul>
+		<li></li>
+	</ul>
+	<ul>
+		<li></li>
+	</ul>
+ 
 </body>
 </html>
