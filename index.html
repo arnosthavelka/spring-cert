@@ -1164,12 +1164,125 @@ t.delete(uri);
 	<h4>5.1.7 Does the HttpInvoker require to run a web server on the client side?  On the server side?</h4>
 	<p>Hessian (Caucho's binary-based format), Burlap (Caucho's XML-based format), HttpInvoker (spring's binary-based format) need a web server on the  server side, but not on the client side.</p>
 
+	<h3>5.2 Security</h3>
+	<p>Basic concepts:</p>
 	<ul>
-		<li></li>
+		<li><strong>Authentication</strong> is the process of verifying a principal's identity against what it claims to be.</li>
+		<li>A <strong>principal</strong> can be a user, a device or a system, but most typically, it's a user. </li>
+		<li>A principal has to provide evidence of identity to be authenticated. </li>
+		<li>This evidence is called a <strong>credential</strong>, which is usually a password when the target principal is a user.</li>
+		<li><strong>Authorization</strong> is the process of granting <strong>authorities</strong> to an authenticated user so that this user is allowed to access particular resources.</li>
+		<li>The authorization process must be performed after the authentication process.</li>
+		<li>Typically, authorities are granted in terms of roles.</li>
+		<li><strong>Access control</strong> means controlling access to an application's resources.</li>
+		<li>It entails making a decision on whether a user is allowed to access a resource.</li>
+		<li>This decision is called an access control decision, and it's made by comparing the resource's access attributes with the user's granted authorities or other characteristics.</li>
 	</ul>
+      <p>Security is activated in web.xml:</p>
+<pre class="prettyprint"><code class="language-xml">&lt;filter&gt;
+    &lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
+    &lt;filter-class&gt;org.springframework.web.filter.DelegatingFilterProxy&lt;/filter-class&gt;
+&lt;/filter&gt;
+</code></pre>
+      <p>Auto-config includes:</p>
+<pre class="prettyprint"><code class="language-xml">&lt;http&gt;
+    &lt;form-login /&gt;
+    &lt;http-basic /&gt;
+    &lt;logout /&gt;
+&lt;/http>
+</code></pre>
 	<ul>
-		<li></li>
+		<li>Use &lt;form-login /&gt; to set: login-pages, default-target-url,  authentication-failure-url</li>
+		<li>Use &lt;logout /&gt; to set:  logout-success-url</li>
+		<li>Use &lt;anonymous username=&quot;guest&quot;  granted-authority=&quot;ROLE_GUEST&quot; /&gt; to setup the anonymous user</li>
+		<li>Use &lt;remember-me /&gt; to setup Remember-Me Support</li>
 	</ul>
+
+	<h4>5.2.1 What is the &quot;Security filter chain&quot; used in Spring  Security?</h4>
+	<p>Series of servlet filters that must be passed  before/after resource is accessed. These include:</p>
+	<ul><strong><font color="red">Check againt training materials!</font></strong>
+		<li>loading HttpSession's context </li>
+		<li>logging out if needed </li>
+		<li>authenticating if needed </li>
+		<li>throwing proper exception (after only) </li>
+		<li>checking role</li>
+	</ul>
+	<h4>5.2.2 Syntax to configure Spring Security to intercept particular URLs? (you need to have a good understanding of the various examples using intercept-url in the course)</h4>
+<pre class="prettyprint"><code class="language-xml">&lt;security:http&gt;
+    &lt;security:intercept-url pattern="/stuff/**"  [method="GET"] access="role1, role2" /&gt;
+&lt;/security:http&gt;
+</code></pre>
+	<ul><strong><font color="red">Check againt training materials!</font></strong>
+		<li>Always end url with a &quot;*&quot; to prevent hackers skipping the check by adding extra request parameters</li>
+		<li>Pattern uses Ant syntax (** is any level of directories), can change to reg exp</li>
+		<li>Access can get IS_AUTHENTICATED_FULLY or a list of roles</li>
+		<li>If more than one intercept-url, matched top to bottom</li>
+		<li>filters=&quot;none&quot; - no security applied</li>
+		<li>Anonymous users have the ROLE_ANONYMOUS role</li>
+	</ul>
+	<h4>5.2.3 Syntax to configure method level security</h4>
+	<strong><font color="red">Check againt training materials!</font></strong>
+	<h4>5.2.4 Method level security using @Secured or @RolesAllowed</h4>
+	<ul>
+		<li>Spring
+			<ul>
+				<li>XML activation - &lt;security:global-method-security <strong>secured-annotations</strong>=&quot;enabled&quot; /&gt;</li>
+				<li>Usage - <strong>@Secured</strong>(&quot;role1&quot;) to pass allowed roles</li>
+			</ul>
+		</li>
+		<li>JSR-250
+			<ul>
+				<li>XML activation - &lt;security:global-method-security <strong>jsr250-annotations</strong>=&quot;enabled&quot; /&gt;</li>
+				<li>Usage - <strong>@RolesAllowed</strong>(&quot;role1&quot;) to pass allowed roles</li>
+			</ul>
+		</li>
+		<li>Without annotations:
+<pre class="prettyprint"><code class="language-xml">&lt;security:global-method-security&gt;
+    &lt;security:protect-pointcut expression="execution(*  doStuff())" access="role" /&gt;
+&lt;/security:global-method-security&gt;
+</code></pre>
+		</li>
+		<li>Secure a bean with a list of method names using:
+<pre class="prettyprint"><code class="language-xml">&lt;bean  id="..." &gt;
+    &lt;security:intercept-methods&gt;
+        &lt;security:protect  method="com.apress.springrecipes.board.service.MessageBoardService.listMessages" access="ROLE_USER,ROLE_GUEST" /&gt;
+    &lt;/security:intercept-methods&gt;
+&lt;/bean&gt;
+</code></pre>
+		</li>
+	</ul>
+	<h4>5.2.5 Possible mechanisms to store user details: database? LDAP? Others?</h4>
+	<ul>
+		<li>Database: &lt;security:jdbc-user-service data-source-ref=&quot;ds&quot; /&gt;</li>
+		<li>In memory: &lt;security:user-service properties=&quot;a.properties&quot; /&gt;</li>
+		<li>xml or properties files</li>
+		<li>LDAP, JAAS, SSO, OpenId, etc.</li>
+	</ul>	  
+	<p>Example:</p>
+<pre class="prettyprint"><code class="language-xml">&lt;authentication-manager&gt;
+    &lt;authentication-provider&gt;
+        &lt;user-service&gt;
+            &lt;user name="jimi" password="jimispassword" authorities="ROLE_USER, ROLE_ADMIN" /&gt;
+            &lt;user name="bob" password="bobspassword" authorities="ROLE_USER" /&gt;
+        &lt;/user-service&gt;
+    &lt;/authentication-provider&gt;
+&lt;/authentication-manager&gt;
+</code></pre>
+	<h4>5.2.7. When working with an authentication provider, is it possible to use  a password encoder?</h4>
+	<p>Yes - &lt;security:password-encoder hash=&quot;abc&quot; /&gt;</p>
+      <h4>5.2.8 In the security tag library, what is the purpose of the  &lt;security:authorize /&gt; tag?</h4>
+      <p>To say what roles are permitted access to a section of the JSP.</p>
+<pre class="prettyprint"><code class="language-xml">&lt;security:authorize access=&quot;hasRole('supervisor')&quot;&gt;do stuff&lt;/security:authorize&gt;
+&lt;security:authorize ifAnyGranted=&quot;roles&quot;&gt;do stuff&lt;/security:authorize&gt;
+</code></pre>
+	<p>Possible properties:</p>
+	<ul><strong><font color="red">Check againt training materials!</font></strong>
+		<li>access</li>
+		<li>url</li>
+		<li>ifAnyGranted</li>
+		<li>ifAllGranted</li>
+	</ul>
+
 	<ul>
 		<li></li>
 	</ul>
