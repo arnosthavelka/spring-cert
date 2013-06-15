@@ -1283,6 +1283,81 @@ t.delete(uri);
 		<li>ifAllGranted</li>
 	</ul>
 
+	<h3>5.3 JMS</h3>
+	<font color='blue' size="4">JmsTemplate</font>
+	<ul>
+		<li>Instances of the JmsTemplate class are thread-safe once configured.</li>
+		<li>All send methods put message on queue and resume.</li>
+		<li>All receive methods are blocking / synchronous.</li>
+		<li>MessagePostProcessor interface gives you access to the message after it has been converted.</li>
+		<li>Properties:
+			<ul>
+				<li>Connection Factory (e.g. SingleConnectionFactory or CachingConnectionFactory - required</li>
+				<li>Use &quot;defaultDestination&quot; (destination does not need to be specified for each send / receive call) - Spring bean (reference name) or DestinationResolver.</li>
+			</ul>
+		</li>
+		<li>Methods (use MessageCreator - if need to map object to/from Message for nonstandard type):
+			<ul>
+				<li>&quot;convertAndSend()&quot; - delegates conversion to the MessageConverter bean (set on the JmsTemplate) and then sends message</li>
+				<li>&quot;convertAndSend()&quot; - waits to receive message and then delegates to the MessageConverter bean (set on the JmsTemplate).</li>
+				<li>&quot;execute()&quot; - use for SessionCallback and ProducerCallback</li>
+				<li>No callback methods exist.</li>
+			</ul>
+<pre class="prettyprint"><code class="language-java">jmsTemplate.send(this.queue, new MessageCreator() {
+    public  Message createMessage(Session session) throws JMSException {
+            return  session.createTextMessage("hello queue world");
+    }
+});
+</code></pre>
+		</li>
+		<li>Configuration:
+			<ul>
+				<li>Create connection factory and queues by creating bean for standalone or &lt;jee:jndi-lookup jndi-name=&quot;jms/aaa&quot; /&gt;</li>
+				<li>Can wrap with CachingConnectionFactory if need caching</li>
+			</ul>
+		</li>
+	</ul>
+	<h4>5.3.1 Purpose of the JmsTemplate</h4>
+	<ul>
+		<li>Simplify usage of JMS</li>
+		<li>Reduce boilerplate code</li>
+		<li>Handle  exceptions</li>
+		<li>etc.</li>
+	</ul>
+	<h4>5.3.2 How to declare a JMS Listener? Can a JMS Listener be a POJO?</h4>
+	<font color='blue' size="4">Declaration of the JMS Listener</font>
+	<ul>
+		<li>Use Message-Driven POJOs (which must be thread-safe)</li>
+		<li>Implement javax.jms.MessageListener (JavaEE) or SessionAwareMessageListener (Spring-specific)</li>
+		<li>Use the MessageListenerAdapter class (as spring bean), e.g.:
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="messageListener" class="org.springframework.jms.listener.adapter.MessageListenerAdapter"&gt;
+    &lt;constructor-arg&gt;
+        &lt;bean class="MyDelegate"/&gt;
+    &lt;/constructor-arg&gt;
+&lt;/bean&gt;
+</code></pre>
+		</li>
+		<li>Define a container
+<pre class="prettyprint"><code class="language-xml">&lt;jms:listener-container connection-factory="connFactoryRef"&gt;
+    &lt;jms:listener destination="d" ref="myDelegate" /&gt;
+&lt;/jms:listener-container&gt;
+</code></pre>
+		</li>
+		<li>Extend JmsGatewaySupport - use SimpleMessageListenerContainer (non-txn aware) or DefaultMessageListenerContainer (txn aware)</li>
+	</ul>	
+    <font color='blue' size="4">JMS Listener as POJO</font>
+    <p><strong>Yes</strong> - just register  in XML inside a listener-container</p>
+<pre class="prettyprint"><code class="language-xml">&lt;jms:listener destination="d" ref="myDelegate" method="m" response-destination="rd" /&gt;
+</code></pre>
+	<p>MEM:</p>
+	<ul>
+		<li>destination is where we listen for a message</li>
+		<li>response-destination is needed if the method  doesn't return void</li>
+	</ul>
+	<h4>5.3.8 Is it possible to run JMS inside a plain Servlet container without full Java EE support (such as Tomcat or Jetty)?</h4>
+	<p><strong>Yes</strong> - with usage SimpleMessageListenerContainer (for basics) or DefaultMessageListenerContainer (for transactions).</p>
+
+	  
 	<ul>
 		<li></li>
 	</ul>
