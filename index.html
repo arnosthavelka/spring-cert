@@ -1354,13 +1354,52 @@ t.delete(uri);
 		<li>destination is where we listen for a message</li>
 		<li>response-destination is needed if the method  doesn't return void</li>
 	</ul>
-	<h4>5.3.8 Is it possible to run JMS inside a plain Servlet container without full Java EE support (such as Tomcat or Jetty)?</h4>
+	<h4>5.3.3 Is it possible to run JMS inside a plain Servlet container without full Java EE support (such as Tomcat or Jetty)?</h4>
 	<p><strong>Yes</strong> - with usage SimpleMessageListenerContainer (for basics) or DefaultMessageListenerContainer (for transactions).</p>
 
-	  
+
+	<h3>5.4 JMX</h3>
+	<h4>5.4.1 Role of the MBeanExporter</h4>
+	<p>Expose POJO as MBean. This class is responsible for taking your Spring beans and registering them with a JMX MBeanServer.</p>
+	<h4>5.4.2 Using Spring JMX, is it possible to export a POJO as an MBean?</h4>
+	<p><strong>Yes</strong> - register as a bean and use MBeanExporter</p>
+<pre class="prettyprint"><code class="language-xml">&lt;bean class="org.springframework.jmx.export.MBeanExporter"&gt;
+    &lt;property name="beans"&gt;
+        &lt;util:map&gt;
+            &lt;entry key="bean:name=mine" value-ref="beanRef" /&gt;
+        &lt;/util:map&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
 	<ul>
-		<li></li>
+		<li>Bean is exposed as an MBean under the ObjectName  bean:name=mine</li>
+		<li>By default, the Spring MBeanExporter exports all public properties of a bean as MBean attributes and all public methods as MBean  operations.</li>
+		<li>Use an MBeanInfoAssembler to control attributes and operations</li>
+		<li>Use org.springframework.jmx.export.annotation.AnnotationMBeanExporter to detect @ManagedResource annotations</li>
+		<li>Use &lt;context:mbean-export server=&quot;mbeanServer&quot;  default-domain=&quot;bean&quot; /&gt;</li>
 	</ul>
+	<h4>5.4.3 Using Spring JMX, is it possible to automatically register an existing MBean with an MBeanServer?</h4>
+	<p><strong>Yes</strong> - just register them as a bean in the XML config and Spring will notice they are already MBeans (i.e those beans implementing classes that end in MBean).</p>
+	<h4>5.4.4 Purpose of the @ManagedResource, @ManagedAttribute and @ManagedOperation annotations</h4>
+	<ul>
+		<li><strong>@ManagedResource</strong>(objectName=&quot;mine&quot;) - identifies class as MBean</li>
+		<li><strong>@ManagedAttribute</strong> – expose field to JMX – place on getter and setter</li>
+		<li><strong>@ManagedOperation</strong> – expose method to JMX </li>
+	</ul>
+	<h4><font color='brown'>5.4.5 How to declare an MBeanServer</font></h4>
+      <p>Export MBeans: &lt;context:mbean-export /&gt; <br>
+        Automatic registration of existing MBeans: &lt;bean  id=&quot;mine&quot; class=&quot;ExistingMBean&quot; /&gt;<br>
+        Define MBeanServer: &lt;context:mbean-server /&gt; </p>
+      <p>Or declare the MBeanServerFactoryBean with the  locateExistingServerIfPossible property so it can use an existing server or  create a new one.</p>
+      <h4>5.4.6 Accessing remote MBean (through a proxy)</h4>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="mbeanServerConnection"... /&gt;
+    &lt;bean  id="..." class="org.springframework.jmx.access.MBeanProxyFactoryBean"&gt;
+        &lt;property name="server" ref="mbeanServerConnection" /&gt;
+        &lt;property name="objectName" value="bean:name=mine" /&gt;
+        &lt;property name="proxyInterface" value="Mine" /&gt;
+    &lt;/bean&gt;
+&lt;/beans&gt;
+</code></pre>
  
 </body>
 </html>
