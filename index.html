@@ -305,16 +305,16 @@
 		<li>Use the &quot;parent&quot; attribute to inherit (and  merge entries) from a parent collection.</li>
 		<li>Strongly typed collections - Entries will be converted to the appropriate  type prior to being added to the Collection</li>
 	</ul>
-	<h4>1.4.3-1 How to create an ApplicationContext? </h4>
+	<h4>1.4.3-1 How to create an ApplicationContext?</h4>
 <pre class="prettyprint"><code class="language-java">ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");</code></pre>
 	<p>Supports multiple resources</p>
-	<h4>1.4.3-2 What are the resource prefixes that can be used? </h4>
+	<h4>1.4.3-2 What are the resource prefixes that can be used?</h4>
 	<ul>
 		<li>classpath:</li>
 		<li>file:</li>
 		<li>http:</li>
 	</ul>
-	<h4>1.4.3-3 How to refer to a Spring configuration file inside a package? </h4>
+	<h4>1.4.3-3 How to refer to a Spring configuration file inside a package?</h4>
 <pre class="prettyprint"><code class="language-java">new ClasspathXmlApplicationContext("/com/mine/app-config.xml");</code></pre>
 	<h4>1.4.3-4 The different implementations of ApplicationContext that can be used in an application</h4>
 	<ul><strong>ClasspathXmlApplicationContext</strong>
@@ -1198,14 +1198,14 @@ t.delete(uri);
 		<li>Use &lt;remember-me /&gt; to setup Remember-Me Support</li>
 	</ul>
 
-	<h4>5.2.1 What is the &quot;Security filter chain&quot; used in Spring  Security?</h4>
-	<p>Series of servlet filters that must be passed  before/after resource is accessed. These include:</p>
-	<ul><strong><font color="red">Check againt training materials!</font></strong>
-		<li>loading HttpSession's context </li>
-		<li>logging out if needed </li>
-		<li>authenticating if needed </li>
-		<li>throwing proper exception (after only) </li>
-		<li>checking role</li>
+	<h4>5.2.1 What is the &quot;Security filter chain&quot; used in Spring Security?</h4>
+	<p>Series of servlet filters (filter chain) that must be passed before/after resource is accessed. The chain is declared in web.xml (as servlet filter) and consists of:</p>
+	<ul>
+		<li><strong>HttpSessionContextIntegrationFilter</strong> - loading HttpSession's context </li>
+		<li><strong>LogoutFilter</strong> - logging out if needed (logout was triggered)</li>
+		<li><strong>AuthenticationProcessingFilter</strong> - authenticating if needed</li>
+		<li><strong>ExceptionTranslationFilter</strong> - throwing proper exception (after only) </li>
+		<li><strong>FilterSecurityInterceptor</strong> - checking role (authorization)</li>
 	</ul>
 	<h4>5.2.2 Syntax to configure Spring Security to intercept particular URLs? (you need to have a good understanding of the various examples using intercept-url in the course)</h4>
 <pre class="prettyprint"><code class="language-xml">&lt;security:http&gt;
