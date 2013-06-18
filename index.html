@@ -22,18 +22,11 @@
     <p>I have <strong>copied / reposted </strong> them, changed the formatting and added where I thought appropriate.</p>
 	
 	<h2>SpringSource Certification</h2>
-	<p>Breakdown of <a href="http://mylearn.vmware.com/mgrReg/plan.cfm?plan=31110&ui=www_cert">certification</a> exam (scope) defined in <a href="http://mylearn.vmware.com/courseware/152239/core-spring-3.0-certification-study-guide.pdf">study guide</a> is:
+	<p>Summary of <a href="http://mylearn.vmware.com/mgrReg/plan.cfm?plan=31110&ui=www_cert">certification</a> exam defined in <a href="http://mylearn.vmware.com/courseware/152239/core-spring-3.0-certification-study-guide.pdf">study guide</a> is:
 		<ul>
-			<li>Container and test</li>
-			<li>AOP</li>
-			<li>JDBC</li>
-			<li>Transactions</li>
-			<li>Web</li>
-			<li>REST</li>
-			<li>Remoting</li>
-			<li>Security</li>
-			<li>JMS</li>
-			<li>JMX</li>
+			<li>Computer-based exam (any Paerson VUE Test Center)</li>
+			<li>90 minutes</li>
+			<li>Passing score 76% (38 questions answered successfully)</li>
 		</ul>
 	</p>
 
@@ -44,20 +37,21 @@
 		<li> <a target="_core3" href="http://static.springsource.org/spring/docs/3.2.x/changelog.txt">Change Log</a></li>
 	</ul>
 
-	<h2>Spring Framewwork 3.2 - Certification Study Notes</div></h2>
+	<hr/>
 
-    <h3>1. Container</h3>
+    <h2>!!! 1. Container</h2>
     <h3>1.1 General</h3>
     <h4>1.1.1 The potential advantages of using Spring's dependency injection?</h4>
-	<ul><strong>Pros:</strong>
-		<li>Loosely coupled code</li>
-		<li>Autowire</li>
-		<li>Dependency checking</li>
+	<ul>
+		<li>Instances/objects get what they need (simplifies code, improves reusability, frees from resolving dependencies)</li>
+		<li>Promotes programming to interfaces (leads to loosely coupled code)</li>
+		<li>Improves testability (dependency can be easily mocked or stubbed)</li>
+		<li>Centralized object's lifecycle control (autowire, dependency checking)</li>
 	</ul>
-    <h3>1.1.2 Dependency injection in XML, using constructor or setter injection</h3>
+    <h4>1.1.2 Dependency injection in XML, using constructor or setter injection</h4>
 	<font color='blue' size="4">Constructor</font>
-    <p><strong>&lt;constructor-arg/&gt;</strong> -  Only works if there is no ambiguity in args</p>
-    <p>Use the following attributes to reduce ambiguity:</p>
+    <p><strong>&lt;constructor-arg/&gt;</strong></p>
+    <p>Only works if there is no ambiguity in args. Use the following attributes to reduce ambiguity:</p>
     <ul>
 		<li>
 			&quot;type&quot; matching by specifying argument type
@@ -97,35 +91,15 @@
 </code></pre>
 
     <h4>1.1.3 Scopes</h4>
-    <p>Supported</p>
 	<ul>
-		<li>Singleton (default)</li>
-		<li>Prototype</li>
-		<li>Web (request, session and global session)</li>
+		<li><strong>Singleton</strong> (default) - a single instance is used (in context)</li>
+		<li><strong>Prototype</strong> - each usage has new instance</li>
+		<li><strong>Session</strong> - every user's session has its own instance (web environment)</li>
+		<li><strong>Request</strong> - every user's request has its own instance (web environment)</li>
+		<li><strong>Custom</strong> - define scope by your needs (e.g. 'flow' in Spring WebFlow)</li>
     </ul>
 
 	<h3>1.2 Lifecycle</h3>
-    <h4>1.2.1 How to declare an initialization method in a Spring bean?</h4>
-	<ul>
-		<li>XML: &lt;bean ... <strong>init-method</strong>="init"&gt;</li>
-		<li>JSR-250: <strong>@PostConstruct</strong></li>
-		<li>Implement <strong>BeanPostProcessors#xyzProcessBeforeInitialization</strong></li>
-		<li>Implement <strong>InitializingBean</strong></li>
-	</ul>
-    <h4>1.2.2 How to declare a destroy method in a Spring bean?</h4>
-	<ul>
-		<li>XML: &lt;bean ... <strong>destroy-method</strong>="finish"&gt;</li>
-		<li>JSR-250: <strong>@PreDestroy</strong></li>
-		<li>Implement <strong>DisposableBean</strong></li>
-	</ul>
-    <h4>1.2.3 Default bean instantiation policy: when are beans instantiated?</h4>
-    <p>For Singleton, when app context is created / parsed</p>
-    <p>To specify instantiation policy</p>
-	<ul>
-		<li>Use &quot;lazy-init&quot; on the  &quot;bean&quot; element</li>
-		<li>Use the &quot;default-lazy-init&quot; on the  &quot;beans&quot; element</li>
-	</ul>
-    <p><font color='blue' size="4">Lifecycle:</font>
 	<svg style="width:400px; height:350px;">
 		<text x="80" y="20">Definition of application context</text>
 		<line x1="180" y1="35" x2="180" y2="80" stroke="#000000" stroke-width="2"/>
@@ -179,12 +153,7 @@
 		<li>DisposableBean (#destroy)</li>
 		<li>Call destroy-method</li>
 	</ol>
-	<p><font color='blue' size="4">Mem:</font>
-	<ul>
-		<li>Order (by component): XML: context, BFPP, new, set, BPP#before,  init[@PostConstruct, Init#after, init-method], BPP#after, dispose[@PreDestroy,  Disp#destroy, destroy-method]</li>
-		<li>Sequence (by type): init / destroy order is: (@) annotation, (#)  interface method, (-) xml attribute</strong></li>
-	</ul>
-	<font color='blue' size="4">What are BeanFactoryPostProcessors and BeanPostProcessors? When are  they called in the startup process?</font>
+	<font color='blue' size="4">BeanFactoryPostProcessors vs. BeanPostProcessors</font>
 	<ul><strong>BeanFactoryPostProcessors</strong>
 		<li>Each processor is called once per xml (i.e per  application context)</li>
 		<li>Before beans are instantiated</li>
@@ -194,6 +163,31 @@
 	<ul><strong>BeanPostProcessors</strong>
 		<li>Each processor is called once per bean</li>
 		<li>Can run before / after a bean is initialised </li>
+	</ul>
+    <h4>1.2.1 How to declare an initialization method in a Spring bean?</h4>
+	<ul>
+		<li>XML: &lt;bean ... <strong>init-method</strong>="init"&gt;</li>
+		<li>JSR-250: annotation <strong>@PostConstruct</strong> on method</li>
+		<li>Implement <strong>BeanPostProcessors#xyzProcessBeforeInitialization</strong></li>
+		<li>Implement <strong>InitializingBean#afterPropertiesSet</strong></li>
+	</ul>
+    <h4>1.2.2 How to declare a destroy method in a Spring bean?</h4>
+	<ul>
+		<li>XML: &lt;bean ... <strong>destroy-method</strong>="finish"&gt;</li>
+		<li>JSR-250: annotation <strong>@PreDestroy</strong> on method</li>
+		<li>Implement <strong>DisposableBean#destroy</strong></li>
+	</ul>
+    <h4>1.2.3 Default bean instantiation policy: when are beans instantiated?</h4>
+	<ul>
+		<li>For Singleton - when app context is created / parsed</li>
+		<li>For Prototype - anytime the bean is required</li>
+		<li>Lazy loading instantiation policy - attributes &quot;lazy-init&quot; on the &lt;bean/&gt; element or &quot;default-lazy-init&quot; on the &lt;beans/&gt; element</li>
+	</ul>
+
+	<p><font color='blue' size="4">Mem:</font></p>
+	<ul>
+		<li>Order (by component): XML context, BFPP, new, set, BPP#before,  init[@PostConstruct, Init#afterPropertiesSet, init-method], BPP#after, dispose[@PreDestroy,  Disp#destroy, destroy-method]</li>
+		<li>Sequence (by type): init / destroy order is: (@) annotation, (#)  interface method, (-) xml attribute</strong></li>
 	</ul>
 	<h4><font color='brown'>1.x What is a BeanFactory?</font></h4>
 	<p>Underlying basis for Spring's IoC functionality</p>	
@@ -532,7 +526,7 @@ public class WebIntegrationTests {
 	</ul>
 
 
-	<h2>2. AOP</h2>
+	<h2>!!! 2. AOP</h2>
 	<h3>2.1 Recommendations</h3>
 	<h4>2.1.1 In order to work successfully with AOP, it is important to understand  the theory behind the scenes. Consequently you should understand the four main  AOP keywords taught in this course: Aspect, Advice, Pointcut, Joinpoint.</h4>
 	<ul>
@@ -648,7 +642,7 @@ public void doAdvice(Exception ex)
 	<p>Use @Component (with class path scanning)  or register with: &lt;bean  id=&quot;myAspect&quot; class=&quot;org.xyz.NotVeryUsefulAspect&quot;&gt;...</p>
 	  
 	
-	<h3>3. Data Access and transactions</h3>
+	<h2>!!! 3. Data Access and transactions</h2>
 	<h3>3.1 General</h3>
 	<h4>3.1.1 The rationale for having the DataAccessException hierarchy.</h4>
 	<ul>
@@ -916,7 +910,7 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 		<li><strong>SERIALIZABLE</strong> - Ensures that a transaction can read identical rows from a table multiple times. For the duration of this transaction, inserts, updates, and deletes made by other transactions to this table are prohibited. All the  concurrency problems can be avoided, but the performance will be low.</li>
 	</ul>
 	
-	<h1>4. Spring MVC</h1>
+	<h2>!!! 4. Spring MVC</h2>
 	<h3>4.1 General configuration </h3>
 	<ul>
 		<li>&lt;mvc:annotation-driven /&gt; - Registers the DefaultAnnotationHandlerMapping  and AnnotationMethodHandlerAdapter beans that are required for Spring MVC to dispatch requests to @Controllers.</li>
@@ -1107,8 +1101,8 @@ t.delete(uri);
 		<li>Use @RequestBody to map params, use @ResponseBody to map return value</li>
 	</ul>
 
-	<h3>5. Advanced topics </h3>
-	<h4>5.1 Remoting </h4>
+	<h2>!!! 5. Advanced topics </h2>
+	<h3>5.1 Remoting </h3>
 	<h4>5.1.1 Advantages of using Spring Remoting rather than plain RMI?</h4>
 	<ul>
 		<li>Hide plumbing/complexity</li>
