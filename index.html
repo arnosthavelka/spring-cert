@@ -181,7 +181,7 @@
 	<ul>
 		<li>For Singleton - when app context is created / parsed</li>
 		<li>For Prototype - anytime the bean is required</li>
-		<li>Lazy loading instantiation policy - attributes &quot;lazy-init&quot; on the &lt;bean/&gt; element or &quot;default-lazy-init&quot; on the &lt;beans/&gt; element</li>
+		<li>Lazy loading instantiation policy (when first referenced) - attributes &quot;lazy-init&quot; on the &lt;bean/&gt; element or &quot;default-lazy-init&quot; on the &lt;beans/&gt; element</li>
 	</ul>
 
 	<p><font color='blue' size="4">Mem:</font></p>
@@ -194,9 +194,11 @@
 
 	<h3>1.3 Annotations</h3>
 	<h4>1.3.1 Enabling component-scanning</h4>
-	<ul><strong>&lt;context:component-scan /&gt;</strong>
-		<li>Looks for @Component (general), @Controller (web),  @Repository (dao) and @Service (service)</li>
-		<li>Can set context:include-filter and context:exclude-filter  elements</li>
+	<p></p>
+	<ul>
+		<li>Use <strong>&lt;context:component-scan /&gt;</strong> for @Component (general), @Controller (web),  @Repository (dao) and @Service (service)</li>
+		<li>Options:include-filter and context:exclude-filter elements</li>
+		<li>Components (including JAR dependencies) are scanned at startup</li>
 	</ul>
 	<p>Example:</p>
 <pre class="prettyprint"><code class="language-xml">&lt;context:component-scan  base-package="org.example"&gt;
@@ -225,24 +227,31 @@
 	</ul>
 	<h4>1.3.3 How does the @Qualifier annotation complement the use of @Autowired?</h4>
 	<ul>
-		<li><strong>@Qualifier(name)</strong> - specifies specific bean name if desired (e.g. to choose one of many beans of same type)</li>
-		<li>the bean name is considered as a default qualifier value (when no quilifier is defined)</li>
+		<li><strong>@Qualifier(name)</strong> - to define specific bean name if desired or needed (e.g. to choose one of many beans of same type)</li>
+		<li>the bean name is:
+			<ul>
+				<li>considered as a default qualifier value (when no qualifier is defined)</li>
+				<li>auto-generated when not specified (but not accessible)</li>
+				<li>avoid using name when possible</li>
+			</ul>
+		</li>
 	</ul>
 	<h4>1.3.4 What is the role of the @PostConstruct and @PreDestroy annotations?</h4>
 	<p>Similar to init-method and destroy-method </p>
 	<h4>1.3.5 Enabling the scanning of annotations such as @Required and  @PreDestroy?</h4>
-	<p>Use <strong>&lt;context:annotation-config /&gt;</strong> for (Spring's @Required and @Autowired, JSR  250's @PostConstruct, @PreDestroy and @Resource, PA's @PersistenceContext and  @PersistenceUnit) </p>
+	<p>Use <strong>&lt;context:annotation-config /&gt;</strong> for (Spring's @Required and @Autowired, JSR  250's @PostConstruct, @PreDestroy and @Resource, 
+		PA's @PersistenceContext and  @PersistenceUnit) and process all DI annotations.</p>
 	<ul>
 		<li>&lt;context:component-scan /&gt; can also do what &lt;context:annotation-config /&gt; does but &lt;context:component-scan /&gt; also scans packages to find and register beans within the application context.</li>
 		<li>@Required goes on setters, not fields</li>
 		<li>@PostConstruct, @PreDestroy goes on methods</li>
 	</ul>
-	<h4><font color='brown'>1.3.x6 Scheduled tasks</font></h4>
+	<h4><font color='brown'>1.3.x Other annotations</font></h4>
 	<ul>
 		<li>@Scheduled(fixedDelay=5000)</li>
 		<li>@Async</li>
 	</ul>
-	<h4><font color='brown'>1.3.x7 SpEL</font></h4>
+	<h4><font color='brown'>1.3.x SpEL</font></h4>
 	<ul>
 		<li>Code: (new  SpelExpressionParser()).parseExpression(&quot;numberGuess.randomNumber&quot;).getValue(target)</li>
 		<li>Xml: value=&quot;#{numberGuess.randomNumber}&quot;/&gt;</li>
