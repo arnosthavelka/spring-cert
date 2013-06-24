@@ -18,8 +18,9 @@
 	<h1>Spring Core 3.2 - Study Notes © 2013 Arnošt Havelka</h1>
 
 	<h2>Disclaimer</h2>
-    <p>This artical is heavily based on artical <strong><a href="http://springcert.sourceforge.net/">Core Spring Professional Certification Study Guides, Resources, Mock Exams</a> by Gavin Lasnitzki</strong> (and of course <strong><a href="http://www.selikoff.net/2010/08/20/jeannes-core-spring-3-certification-experiences/">jeanne’s core spring 3 certification experiences</a> by Jeanne Boyarsky</strong>). My notes is just an extenstion (in some areas) and update to spring framework 3.2.x.</p>
-    <p>I have <strong>copied / reposted </strong> them, changed the formatting and added where I thought appropriate.</p>
+    <p>This artical is heavily based on artical <strong><a href="http://springcert.sourceforge.net/">Core Spring Professional Certification Study Guides, Resources, Mock Exams</a> by Gavin Lasnitzki</strong> 
+		(and of course <strong><a href="http://www.selikoff.net/2010/08/20/jeannes-core-spring-3-certification-experiences/">jeanne’s core spring 3 certification experiences</a> by Jeanne Boyarsky</strong>). 
+		My notes are "serious" re-work ot their notes. It contains changes to be closer to exam scope, my ideas and updates to spring framework 3.2.x.</p>
 	
 	<h2>SpringSource Certification</h2>
 	<p>Summary of <a href="http://mylearn.vmware.com/mgrReg/plan.cfm?plan=31110&ui=www_cert">certification</a> exam defined in <a href="http://mylearn.vmware.com/courseware/152239/core-spring-3.0-certification-study-guide.pdf">study guide</a> is:
@@ -39,7 +40,7 @@
 
 	<hr/>
 
-    <h2>!!! 1. Container</h2>
+    <h2>1. Container</h2>
     <h3>1.1 General</h3>
     <h4>1.1.1 The potential advantages of using Spring's dependency injection?</h4>
 	<ul>
@@ -189,7 +190,7 @@
 		<li>Order (by component): XML context, BFPP, new, set, BPP#before,  init[@PostConstruct, Init#afterPropertiesSet, init-method], BPP#after, dispose[@PreDestroy,  Disp#destroy, destroy-method]</li>
 		<li>Sequence (by type): init / destroy order is: (@) annotation, (#)  interface method, (-) xml attribute</strong></li>
 	</ul>
-	<h4><font color='brown'>1.x What is a BeanFactory?</font></h4>
+	<h4><font color='brown'>1.2.x What is a BeanFactory?</font></h4>
 	<p>Underlying basis for Spring's IoC functionality</p>	
 
 	<h3>1.3 Annotations</h3>
@@ -246,12 +247,13 @@
 		<li>@Required goes on setters, not fields</li>
 		<li>@PostConstruct, @PreDestroy goes on methods</li>
 	</ul>
-	<h4><font color='brown'>1.3.x Other annotations</font></h4>
+	<h4><font color='brown'>1.3.6 Other</font></h4>
+	<font color='blue'>Other annotations</font>
 	<ul>
 		<li>@Scheduled(fixedDelay=5000)</li>
 		<li>@Async</li>
 	</ul>
-	<h4><font color='brown'>1.3.x SpEL</font></h4>
+	<font color='blue'>SpEL</font>
 	<ul>
 		<li>Code: (new  SpelExpressionParser()).parseExpression(&quot;numberGuess.randomNumber&quot;).getValue(target)</li>
 		<li>Xml: value=&quot;#{numberGuess.randomNumber}&quot;/&gt;</li>
@@ -270,30 +272,28 @@
 		<li>Empty: &lt;property  name=&quot;email&quot;&gt;&lt;value/&gt;&lt;/property&gt;</li>
 		<li>Null: &lt;property name=&quot;a&quot;&gt;&lt;null  /&gt;&lt;/property&gt;</li>
 		<li>Compound property names: person.address.streetNo</li>
+		<li>Annotation @Value (see chapter 1.3.x)</li>
 	</ul>
 	<h4>1.4.2 How to refer to a collection in a Spring bean definition?</h4>
-	<p>List</p>
 <pre class="prettyprint"><code class="language-xml">&lt;list&gt;
     &lt;ref  bean="one" /&gt;
 &lt;/list&gt;
 </code></pre>
-	<p>Set</p>
 <pre class="prettyprint"><code class="language-xml">&lt;set&gt;
     &lt;ref bean="one" /&gt;
 &lt;/set&gt;
 </code></pre>
-	<p>Properties</p>
-<pre class="prettyprint"><code class="language-xml">&lt;props&gt;
+<pre class="prettyprint"><code class="language-xml">&lt;props&gt; &lt;!-- properties --&gt;
     &lt;prop key="a" value="b" /&gt;
 &lt;/props&gt;
 </code></pre>
-	<p>Map</p>
 <pre class="prettyprint"><code class="language-xml">&lt;map&gt;
     &lt;entry key="a" value="b" /&gt;
 &lt;/map&gt;
-</code></pre>
-	<p>or</p>
-<pre class="prettyprint"><code class="language-xml">&lt;map&gt;
+
+&lt;!-- or --&gt;
+
+&lt;map&gt;
     &lt;entry&gt;
         &lt;key&gt;
             &lt;value>a&lt;/value&gt;
@@ -308,38 +308,40 @@
 		<li>Use the &quot;parent&quot; attribute to inherit (and  merge entries) from a parent collection.</li>
 		<li>Strongly typed collections - Entries will be converted to the appropriate  type prior to being added to the Collection</li>
 	</ul>
-	<h4>1.4.3-1 How to create an ApplicationContext?</h4>
+	<h4>1.4.3 How to create an ApplicationContext? What are the resource prefixes that can be used? How to refer to a Spring configuration file inside a package? The different implementations of ApplicationContext that can be used in an application.</h4>
+	<font color='blue' size="4">Creation of ApplicationContext</font>
 <pre class="prettyprint"><code class="language-java">ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");</code></pre>
 	<p>Supports multiple resources</p>
-	<h4>1.4.3-2 What are the resource prefixes that can be used?</h4>
+	<font color='blue' size="4">Prefixes</font>
 	<ul>
 		<li>classpath:</li>
 		<li>file:</li>
 		<li>http:</li>
 	</ul>
-	<h4>1.4.3-3 How to refer to a Spring configuration file inside a package?</h4>
+	<font color='blue' size="4">Reference to configuration file</font>
 <pre class="prettyprint"><code class="language-java">new ClasspathXmlApplicationContext("/com/mine/app-config.xml");</code></pre>
-	<h4>1.4.3-4 The different implementations of ApplicationContext that can be used in an application</h4>
+	<font color='blue' size="4">Implementations of ApplicationContext</font>
 	<ul><strong>ClasspathXmlApplicationContext</strong>
-		<li>Defaults to classpath:</li>
+		<li>Default prefix is classpath</li>
 		<li>Starts looking from root of classpath regardless  of whether specify &quot;/&quot;</li>
 	</ul>
 	<ul><strong>FileSystemXmlApplicationContext</strong>
-		<li>Defaults to file:</li>
+		<li>Default prefix is file</li>
 		<li>Uses relative path even if specify  &quot;/&quot;, but &quot;file:/mine&quot; forces an absolute path</li>
 	</ul>
 	<ul><strong>XmlWebApplicationContext</strong>
-		<li>Defaults to file: in  /WEB-INF/applicationContext.xml</li>
+		<li>Default web app (file) is /WEB-INF/applicationContext.xml</li>
 		<li>Uses path relative to web application</li>
 	</ul>
 	<h4>1.4.4 How to externalize constants from a Spring XML configuration file  into a .properties file?</h4>
 	<font color='blue' size="4">context:property-placeholder</font>
+	<p>Definition/config:</p>
 <pre class="prettyprint"><code class="language-xml">&lt;context:property-placeholder location="/myFile.properties" /&gt;</code></pre>
-	Usage XML:
+	<p>Usage in XML:</p>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="mind" class="Mine"&gt;
 	&lt;property  name="a" value="${myProperty}" /&gt;
 &lt;/bean&gt;</code></pre>
-	Usage annotation:
+	<p>Usage with annotation:</p>
 <pre class="prettyprint"><code class="language-java">@Value("${myProperty}")
 private String value;</code></pre>
 	<font color='blue' size="4">util:properties</font>
@@ -367,16 +369,16 @@ private String myField;
 	<p>Set property as attributes</p>
 <pre class="prettyprint"><code class="language-xml">&lt;beans ...  xmlns:p="http://www.springframework.org/schema/p"&gt;
 &lt;bean id="foo" class="x.y.Foo" 
-	<strong>p:value</strong>="my value" -- literal value
-	<strong>p:service-ref</strong>="myService"/&gt; -- bean reference
+	<strong>p:value</strong>="my value" &lt;!-- literal value --&gt;
+	<strong>p:service-ref</strong>="myService"/&gt; &lt;!-- bean reference --&gt;
 </code></pre>
-	<h4><font color='brown'>1.4.x Difference between &quot;id&quot; and &quot;name&quot; attributes in  the &lt;bean&gt; tag</font></h4>
+	<h4><font color='brown'>1.4.7 Difference between &quot;id&quot; and &quot;name&quot; attributes in  the &lt;bean&gt; tag</font></h4>
 	<p>Identifiers (id and/or name) must be unique within the container that hosts the bean. You are not required to supply a name or id for a bean.  If no name or id is supplied explicitly, the container generates a unique name  for that bean. However, if you want to refer to that bean by name you must  provide a name.</p>
 	<ul>
 		<li><strong>Id</strong> - must be unique (legal characters are limited)</li>
 		<li><strong>Name</strong> - can specify multiple names separated by comma,  semicolon or space (allows more characters in name such as slashes)</li>
 	</ul>
-	<h4><font color='brown'>1.4.x Purpose of the &lt;aop:scoped-proxy/&gt; tag</font></h4>
+	<h4><font color='brown'>1.4.8 Purpose of the &lt;aop:scoped-proxy/&gt; tag</font></h4>
 	<p>If need to inject a bean with request/session scope into  a bean with singleton scope,  the proxy  intercepts it and makes sure you get the right bean for each call. </p>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="userPref" scope="session"&gt;
 	&lt;scoped-proxy/&gt;
@@ -386,7 +388,7 @@ private String myField;
 	&lt;property ref="userPref"/&gt;
 &lt;/bean&gt;
 </code></pre>
-	<h4><font color='brown'>1.4.x How does FactoryBean work (Optional, From 2.5 sample questions)?</font></h4>
+	<h4><font color='brown'>1.4.9 How does FactoryBean work (Optional, From 2.5 sample questions)?</font></h4>
 	<ul>
 		<li>Class name in bean definition (in xml) is that of the factory</li>
 		<li>Setters called on the factory rather than the created bean</li>
@@ -396,7 +398,7 @@ private String myField;
 <pre class="prettyprint"><code class="language-java">getBean(&quot;myBean&quot;) -- returns reference of bean created by FactoryBean
 getBean(&quot;&amp;myBean&quot;) -- returns reference of the FactoryBean instance itself
 </code></pre>
-	<h4><font color='brown'>1.4.x How to inject using a factory method?</font></h4>
+	<h4><font color='brown'>1.4.10 How to inject using a factory method?</font></h4>
 	<ul>
 		<li>Instance (non-static) factory method: specify  &quot;factory-bean&quot; and &quot;factory-method&quot; attributes</li>
 		<li>Static factory method: specify &quot;class&quot; and  &quot;factory-method&quot; attributes</li>
@@ -411,13 +413,13 @@ getBean(&quot;&amp;myBean&quot;) -- returns reference of the FactoryBean instanc
       factory-bean="serviceLocator"
       factory-method="createClientServiceInstance"/&gt;
 </code></pre>
-	<h4><font color='brown'>1.4.x Splitting the XML</font></h4>
+	<h4><font color='brown'>1.4.11 Splitting the XML</font></h4>
 	<ul>
 		<li>&lt;import resource=&quot;local path&quot; /&gt;, path is relative to the definition file</li>
 		<li>Prefer &quot;multiple resource locations&quot; as configs are unaware of each other</li>
 		<li>Use classpath:/.. or file:.. if need an absolute path</li>
 	</ul>
-	<h4><font color='brown'>1.4.x Use constants in configuration</font></h4>	
+	<h4><font color='brown'>1.4.12 Use constants in configuration</font></h4>	
 	<p>XML:</p>
 <pre class="prettyprint"><code class="language-xml">&lt;util:constant id="maxInt" static-field="java.lang.Integer.MAX_VALUE"/&gt;
 </code></pre>
@@ -427,6 +429,11 @@ getBean(&quot;&amp;myBean&quot;) -- returns reference of the FactoryBean instanc
     private Integer myValue;
 }
 </code></pre>
+	<h4><font color='brown'>1.4.13 Other annotations</font></h4>
+	<ul>
+		<li><strong>@Scope(&quot;prototype&quot;)</strong> - to change default (singleton) scope</li>
+		<li><strong>@DependsOn</strong> - beans on which the current bean depends</li>
+	</ul>
 
 	<h3>1.5 JavaConfig </h3>
 	<h4>1.5.1 Usage of the @Bean and @Configuration annotations</h4>
@@ -444,9 +451,8 @@ getBean(&quot;&amp;myBean&quot;) -- returns reference of the FactoryBean instanc
 	</ul>
 	<p>Other usefull annotations:</p>
 	<ul>
-		<li><strong>@Scope(&quot;prototype&quot;)</strong> - to change default (singleton) scope</li>
+		
 		<li><strong>@Primary</strong> - indicates that a bean should be given preference when multiple candidates are qualified to autowire a single-valued dependency</li>
-		<li><strong>@DependsOn</strong> - beans on which the current bean depends</li>
 		<li><strong>@Import</strong> - to reference another @Configuration (you can't just call it directly as calls must be in the correct order in dependency graph)</li>
 		<li><strong>@ComponentScan("com.acme.app.services")</strong> - same as &lt;context:component-scan/&gt; in XML configuration</li>
 		<li><strong>@PropertySource("classpath:/com/acme/app.properties")</strong> - see example:
@@ -474,17 +480,18 @@ public String myBean() {
 	<ul>
 		<li>Mock Objects (JNDI, Servlet API, etc.)</li>
 		<li>Unit Testing support Classes (ReflectionTestUtils,  ModelAndViewAssert, etc.)</li>
+		<li>Isolation environment & spring configuration</li>
 	</ul>
 	<font color='blue' size="4">Integration testing</font>
 	<ul>
-		<li>To manageSpring IoC container caching (by fixture) between test execution.</li>
+		<li>To manage Spring IoC container caching (by fixture) between test execution.</li>
 		<li>To provide Dependency Injection of test fixture instances.</li>
 		<li>To provide transaction management appropriate to integration testing.</li>
 		<li>To supply Spring-specific support classes that are useful in writing integration tests.</li>
 		<li>Support for JDBC, annotations, Spring MVC, etc.</li>
 	</ul>
 	<h4>1.6.1 How to use Spring's integration testing support in a JUnit 4 test?</h4>
-	<p>Annotations @RunWith(SpringJUnit4ClassRunner) and @ContextConfiguration provides the benefits of the TestContext framework</p>
+	<p>Annotations <strong>@RunWith</strong>(SpringJUnit4ClassRunner) and <strong>@ContextConfiguration</strong> provides the benefits of the TestContext framework</p>
 <pre class="prettyprint"><code class="language-java"><strong>@RunWith(SpringJUnit4ClassRunner.class)</strong>
 <strong>@ContextConfiguration("classpath:/META-INF/spring/hello-app-context.xml")</strong>
 public class HelloServiceDefaultTest {
@@ -500,10 +507,10 @@ public class HelloServiceDefaultTest {
 </code></pre>
 	<p>Others:</p>
 	<ul>
-		<li>Annotation @ContextConfiguration uses sufix "-context.xml"to define default XML configuration, e.g. FooTest-context.xml for test FooTest.java</li>
-		<li>@ContextConfiguration(locations={&quot;config.xml&quot;}) - to define more XML configurations</li>
+		<li>Annotation @ContextConfiguration uses sufix <strong>${test class}-context.xml</strong> to define default XML configuration (e.g. FooTest-context.xml for test FooTest.java) and attribute <strong>locations</strong> (e.g. locations={&quot;config.xml&quot;}) to to define more XML configurations</li>
+		<li>@ContextConfiguration(</li>
 		<li>@Autowire does not work on constructors</li>
-		<li>The context is cached across test fixtures  unless you use @DirtiesContext.</li>
+		<li>The context is cached across test fixtures  unless you use @DirtiesContext (to force spring application context recreation).</li>
 		<li>The &quot;inheritLocations&quot; attribute of  the annotation (default to true) inherits (appended to current list) the  super-classes locations</li>
 		<li>@WebAppConfiguration - to ensure that a WebApplicationContext is loaded for your test</li>
 		<li>@ContextHierarchy - to define a hierarchy of ApplicationContexts for integration tests
