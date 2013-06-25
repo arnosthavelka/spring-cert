@@ -542,28 +542,36 @@ public class WebIntegrationTests {
 	</ul>
 
 
-	<h2>!!! 2. AOP</h2>
+	<h2>2. AOP</h2>
+	<ul>
+		<li>AOP is technology to solve cross-cutting concerns (authentication, logging, transacations, etc.)</li>
+		<li>Spring uses AOP proxy: object created by AOP to implement the aspect contracts.</li>
+		<li>The goal is to eliminate:
+			<ul>
+				<li><strong>Tangling</strong> - mixing of concerns</li>
+				<li><strong>Scattering</strong> - code duplication</li>
+			</ul>
+		</li>
+	</ul>
 	<h3>2.1 Recommendations</h3>
 	<h4>2.1.1 In order to work successfully with AOP, it is important to understand  the theory behind the scenes. Consequently you should understand the four main  AOP keywords taught in this course: Aspect, Advice, Pointcut, Joinpoint.</h4>
 	<ul>
-		<li>AOP is technology to solve cross-cutting concerns (authentication, logging, transacations, etc.)</li>
-		<li>Spring uses AOP proxy: object created by AOP to implement the aspect contracts</li>
 		<li>Targeted object: object being advised</li>
-		<li>MEM: For Aspect A when program reaches a Joinpoint that  matches Pointcut P then execute Advice X</li>
 		<li><strong>Aspect</strong>: a modularization of a concern that cuts across multiple classes (packaged advice and pointcut).</li>
 		<li><strong>Joinpoint</strong>: a point during the execution of a program (when advice is mapped to be executed), such as the execution of a method or the handling of an exception.</li>
 		<li><strong>Advice</strong>: action taken by an aspect at a particular join point (code to execute).</li>
 		<li><strong>Pointcut</strong>: the place in code where code can be injected (expression to identify join point). In Spring this is just before/after methods.</li>
 	</ul>
-
+	<p>MEM: For Aspect A when program reaches a Joinpoint that matches Pointcut P then execute Advice X.</p>
+	
 	<h3>2.2 Pointcuts</h3>
 	<h4>2.2.1 You should have a deep understanding of pointcut expressions. It is important to understand all pointcut examples in the slides (apart from the ones in the &quot;advanced topics&quot; section at the end of the module).</h4>
 	<ul>MEM:
 		<li>Definition: <strong>execution([modifiers or annotations] ReturnType [FullyQualifiedClassName.] MethodName ([Arguments]) [throws ExceptionType])</strong></li>
 		<li>Example: [public] String [a.b.c.MyClass] [doWork](String) throws RuntimeException</li>
 		<li>&quot;..&quot; means 0 or more (arguments or packages)</li>
-		<li>&quot;*&quot; means exactly 1 of anything (argument,  package name, etc)</li>
-		<li>&quot;+&quot; means this class or any implementors (no  matter how deep)</li>
+		<li>&quot;*&quot; means exactly 1 of anything (argument, package name, etc)</li>
+		<li>&quot;+&quot; means this class or any implementors (no matter how deep)</li>
 		<li>&amp;&amp;, ||, ! (and, or and not)</li>
 		<li>Pointcut will be matched against public methods only!</li>
 	</ul>
@@ -585,8 +593,19 @@ private void anyOldTransfer() {} // the pointcut signature
 	<ul>
 		<li>Use either <strong>ref pointcut</strong> or <strong>in-place pointcut</strong>
 			<ul>
-				<li>Example of ref: @Before(&quot;x.y.myOperation()&quot;) where @Pointcut(&quot;within(x.y.*)&quot;)  private void myOperation(){} </li>
-				<li>Example of in-place: @Before(&quot;within(x.y.*)&quot;)</li>
+				<li>Example of ref:
+<pre class="prettyprint"><code class="language-java">@Before(&quot;x.y.myOperation()&quot;)
+public void handleMyOperation(){}
+
+@Pointcut(&quot;execution(* transfer(..))&quot;)
+public void myOperation(){}
+</code></pre>
+				</li>
+				<li>Example of in-place:
+<pre class="prettyprint"><code class="language-java">@Before(&quot;execution(* transfer(..))&quot;)
+public void myOperation(){}
+</code></pre>
+				</li>
 			</ul>
 		</li>
 		<li>Prefer least powerful advice that can do the job</li>
@@ -637,26 +656,25 @@ public void doAdvice(Exception ex)
 	<h4>2.4.2 Is it possible to set up Spring AOP using XML configuration only (as  opposed to annotations)? </h4>
 	<p>Yes.</p>
 <pre class="prettyprint"><code class="language-xml">&lt;aop:config&gt;
-    &lt;aop:aspect ref="adviceBean"&gt;
-    &lt;aop:before pointcut="execution...." /&gt;
+	&lt;aop:aspect ref="adviceBean"&gt;
+		&lt;aop:before pointcut="execution...." /&gt;
+	&lt;/aop:aspect&gt;
 &lt;/aop:config&gt;
 </code></pre>
 
 	<h3>2.5 Proxies </h3>
-	<h4>2.5.1-1 When are they generated in the Spring lifecycle?</h4>
-	<p>Bean Post Processing </p>
-	<h4>2.5.1-2 How do they resemble the target object that they advice? </h4>
+	<h4>2.5.1 When are they generated in the Spring lifecycle? How do they resemble the target object that they advice? What limitations does Spring-AOP's proxy-based approach have?</h4>
+	<font color='blue' size="4">Proxy in Spring lifecycle</font>
+	<p>They are created by Bean Post Processing.</p>
+	<font color='blue' size="4">Resemblance of proxy and target object</font>
 	<p>They have the same public interface if there is an interface. You must have an interface or non-final class to create a proxy.</p>
-	<h4>2.5.1-3 What limitations does Spring-AOP's proxy-based approach have? </h4>
+	<font color='blue' size="4">Proxy limits</font>
 	<ul>
 		<li>Can only be used for methods</li>
 		<li>Limited pointcut syntax</li>
 		<li>Doesn't get called if caller makes direct calls (due to proxy)</li>
 		<li>Final classes cannot have aspects applied (proxy does not work)</li>
 	</ul>
-	<h4><font color='brown'>2.5.x How are aspects detected by Spring AOP?</font></h4>
-	<p>Use @Component (with class path scanning)  or register with: &lt;bean  id=&quot;myAspect&quot; class=&quot;org.xyz.NotVeryUsefulAspect&quot;&gt;...</p>
-	  
 	
 	<h2>!!! 3. Data Access and transactions</h2>
 	<h3>3.1 General</h3>
