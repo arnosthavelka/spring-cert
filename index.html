@@ -676,7 +676,7 @@ public void doAdvice(Exception ex)
 		<li>Final classes cannot have aspects applied (proxy does not work)</li>
 	</ul>
 	
-	<h2>!!! 3. Data Access and transactions</h2>
+	<h2>3. Data Access and transactions</h2>
 	<h3>3.1 General</h3>
 	<h4>3.1.1 The rationale for having the DataAccessException hierarchy.</h4>
 	<ul>
@@ -701,8 +701,6 @@ public void doAdvice(Exception ex)
 		</li>
 	</ul>
 	<h3>3.2 The JdbcTemplate </h3>
-	<h4>3.2.1 Usage of the JdbcTemplate with regards to exception handling </h4>
-	<p>JdbcTemplate:</p>
 	<ul>
 		<li>Stateful – it maintains a  reference to a DataSource, but this state is not conversational state</li>
 		<li>Thread-safe - once configured</li>
@@ -724,26 +722,27 @@ public void doAdvice(Exception ex)
 		<li>(Spring) Handle transactions.</li>
 		<li>(Spring) Close the connection, statement and resultset.</li>
 	</ul>
-	<p>Key methods:</p>
-	<ul>
-		<li>queryForInt | queryForLong - get concreate value (&quot;select count(*) from table&quot;);</li>
-		<li>queryForObject – convert to specified type </li>
-		<li>queryForMap – convert to a map with the column name as key</li>
-		<li>queryForList – list of maps (rows)</li>
-		<li>getJdbcOperations – get interface to allow invocation of less commonly used methods</li>
-	</ul>
 	<p>MEM:</p>
 	<ul>
-		<li>RowMapper – to handle mapping of rows returned from a REF cursor</li>
-		<li>RowCallbackHandler – when we need to write out data to file but not return it</li>
-		<li>ResultSetExtractor – extracts values from each row of a ResultSet into one entity</li>
+		<li><strong>RowMapper</strong> – to handle mapping of rows returned from a JDBC cursor</li>
+		<li><strong>RowCallbackHandler</strong> – when we need to write out data to file but not return it</li>
+		<li><strong>ResultSetExtractor</strong> – extracts values from each row of a ResultSet into one entity</li>
+	</ul>
+	<h4>3.2.1 Usage of the JdbcTemplate with regards to exception handling </h4>
+	<p>Key methods:</p>
+	<ul>
+		<li><strong>queryForInt</strong> | <strong>queryForLong</strong> - get concreate value (&quot;select count(*) from table&quot;);</li>
+		<li><strong>queryForObject</strong> – convert to specified type </li>
+		<li><strong>queryForMap</strong> – convert to a map with the column name as key</li>
+		<li><strong>queryForList</strong> – list of maps (rows)</li>
+		<li><strong>getJdbcOperations</strong> – get interface to allow invocation of less commonly used methods</li>
 	</ul>
 
 	<p>Examples of data querying:</p>
 <pre class="prettyprint"><code class="language-java">// querying with parameters
-jdbc.queryFor____(String sql, Object[] args)
-jdbc.queryFor____("select count(*) from table where  col > ? and col < ?", new Object[] {10, 2}); 
-jdbc.queryFor____(String sql, Object... args) 
+jdbc.queryForXyz(String sql, Object[] args)
+jdbc.queryForXyz("select count(*) from table where  col > ? and col < ?", new Object[] {10, 2}); 
+jdbc.queryForXyz(String sql, Object... args) 
 
 
 // usage of mapping entity
@@ -765,7 +764,7 @@ jdbc.query(sql, handler);
 ResultSetExtractor<A> extractor = new  ResultSetExtractor<A>() {
     public A extractData(ResultSet rs) {...};
 };
-jdbc.query(sql,  extractor);
+jdbc.query(sql, extractor);
 </code></pre>
 	<p>Examples of special operations:</p>
 <pre class="prettyprint"><code class="language-java">// querying for DML (insert/update/delete row)
@@ -834,7 +833,7 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 	</ul>
 	<h4>3.4.2 Configuration to declare a JTA transaction manager</h4>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id=&quot;mgr&quot; class=&quot;org.springframework.transaction.jta.JtaTransactionManager&quot;&gt;
-    &lt;property  name="dataSource" ref="dataSource"/&gt;
+    &lt;property name="dataSource" ref="dataSource"/&gt;
 &lt;/bean&gt;
 </code></pre>
 	<p>or</p>
@@ -844,10 +843,10 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
     <p>We have to define transaction manager first (see previous chapters).</p>
 	<font color='blue' size="4">XML</font>
 <pre class="prettyprint"><code class="language-xml">&lt;aop:config&gt;
-    &lt;aop:advisor  pointcut-ref="p" advice-ref="ta" /&gt;
+    &lt;aop:advisor pointcut-ref="p" advice-ref="ta" /&gt;
 &lt;/aop:config&gt;
 
-&lt;tx:advice  id="ta"&gt;
+&lt;tx:advice id="ta"&gt;
     &lt;tx:attributes&gt;
         &lt;tx:method name="update*" timeout="60" /&gt;
         &lt;tx:method name="*" timeout="30"  read-only="true" /&gt;
@@ -857,9 +856,9 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 	<font color='blue' size="4">Annotations</font>
 	<p>Use annotation <strong>@Transactional</strong> as:</p>
 	<ul>
-		<li>applicable on public methods or class</li>
-		<li>not applicable on non-public methods - there will be no error, but no transaction will be applied</li>
+		<li>applicable on public methods or class (not applicable on non-public methods - there will be no error, but no transaction will be applied)</li>
 		<li>not recommend on interfaces b/c not all proxies will take them</li>
+		<li>requires JDK 5</li>		
 	</ul>
 	<h4>3.4.4 Usage of TransactionTemplate for programmatic transaction management  (you simply need to understand a basic example based on the TransactionTemplate).</h4>
 	<ul>
@@ -870,7 +869,11 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 <pre class="prettyprint"><code class="language-java">public Object  someServiceMethod() {
     return  transactionTemplate.execute(new TransactionCallback() {
         public Object  doInTransaction(TransactionStatus status) {
-            updateOperation1();
+            try {
+                updateOperation1();
+            } catch (XyzException e) {
+                <strong>status.setRollbackOnly();</strong>
+            }
             return  resultOfUpdateOperation2();
         }
     });
@@ -878,20 +881,21 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 </code></pre>
 	<h4>3.4.5 Transactions and exception management: what is the default rollback policy? Can it be overridden?</h4>
 	<ul>
-		<li>Default policy is rollback for a RuntimeException.</li>
+		<li><strong>Default policy is rollback</strong> for a RuntimeException.</li>
 		<li>Default policy can be overriden - for the @Transactional annotation, specify <strong>rollbackFor</strong> or <strong>noRollbackFor</strong> when passing Class or rollbackForClassname/noRollbackForClassname when passing Strings.</li>
 	</ul>
 	<h4>3.4.6 The @Transactional annotation: what are the main attributes that can be used for a transaction definition? Can this annotation also be used with a JTA Transaction Manager?</h4>
-	<p>Main attributes of @Transactional annotation are:</p>
+	<font color='blue' size="4">Main attributes of @Transactional annotation:</font>
 	<ul>
 		<li><strong>timeout</strong> - specified in seconds</li>
 		<li><strong>readOnly</strong> - true or false</li>
 		<li><strong>isolation</strong> - Isolation.READ_UNCOMMITTED, READ_COMMITTED,  REPEATABLE_READ or SERIALIZABLE</li>
-		<li><strong>propagation</strong> - Propagation.REQUIRES_NEW, REQUIRED, etc.</li>
+		<li><strong>propagation</strong> - Propagation.REQUIRES_NEW, REQUIRED, etc. (see chapter 3.4.7)</li>
 		<li><strong>rollbackFor</strong> or <strong>rollbackForClassname</strong> - list of exceptions</li>
 		<li><strong>noRollbackFor</strong> or <strong>noRollbackForClassname</strong> - list of exceptions</li>
 	</ul>
-    <p>Yes, @Transactional annotation can be used with JTA Transaction Manager.</p>
+	<font color='blue' size="4">Usage with JTA transaction manager:</font>
+    <p>Yes</p>
 
 	<h4>3.4.7 Regarding propagation modes, what is the difference between PROPAGATION_REQUIRED and PROPAGATION_REQUIRES_NEW</h4>
 	<p>Main attributes of @Transactional annotation are:</p>
@@ -907,7 +911,7 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 	<p>MEM: If methodA calls methodB directly, the transaction  attributes of methodB are NOT used (due to proxy issue).</p>
 
 	<h4>3.4.8 Regarding isolation levels, what is the difference between  READ_COMMITTED and READ_UNCOMMITTED?</h4>
-	<p>Read phenomena:</p>
+	<font color='blue' size="4">Read phenomena:</font>
 	<ul>
 		<li>
 			<strong>Dirty reads</strong> (Uncommitted Dependency) - A dirty read occurs when a transaction is allowed to read data from a row that has been modified by another running transaction and not yet committed.
@@ -947,16 +951,18 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 	<h2>!!! 4. Spring MVC</h2>
 	<h3>4.1 General configuration </h3>
 	<ul>
-		<li>&lt;mvc:annotation-driven /&gt; - Registers the DefaultAnnotationHandlerMapping  and AnnotationMethodHandlerAdapter beans that are required for Spring MVC to dispatch requests to @Controllers.</li>
-		<li>&lt;context:component-scan /&gt; - To enable autodetection of such annotated controllers (as well as other stereotype  components)..</li>
+		<li><strong>&lt;mvc:annotation-driven /&gt;</strong> - Registers the DefaultAnnotationHandlerMapping  and AnnotationMethodHandlerAdapter beans that are required for Spring MVC to dispatch requests to @Controllers.</li>
+		<li><strong>&lt;context:component-scan /&gt;</strong> - To enable autodetection of such annotated controllers (as well as other stereotype  components)..</li>
 	</ul>
 	
 	<h4>4.1.1  This module shows how to configure a ViewResolver, a HandlerMapping and the DispatcherServlet. You won't be asked any question on how to configure those classes. However, you need to know what the goal of each of those components is.</h4>
 	<font color='blue' size="4">View Resolver</font>
 	<ul>
-		<li>Identifies correct view to call (to resolve the view implementation based on given logical name). All handler methods in the Spring Web MVC controllers must resolve to a logical view name. View resolver can not handle absolute path (of view).</li>
-		<li>Explicitly (e.g., by returning a String, View or ModelAndView). They can also return null/void (to use default view) or a concrete class such as new JstlView(path)</li>
-		<li>Implicitly (i.e., based on conventions)</li>
+		<li>Identifies correct view to call (to resolve the view implementation based on a given logical name). All handler methods in the Spring Web MVC controllers must resolve to a logical view name. View resolver can not handle absolute path (to the view).</li>
+		<li>Explicitly (e.g. by returning a String, View or ModelAndView). They can also return null/void (to use default view) or a concrete class such as new JstlView(path)</li>
+		<li>Implicitly (i.e. based on conventions)</li>
+		<li>Can be chained (using the &quot;order&quot; attribute). InternalResourceViewResolver must be last.</li>
+		<li>RedirectView or &quot;redirect:&quot;</li>
 	</ul>
 	<p>Some of implementations:</p>
 	<ul>
@@ -964,14 +970,9 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 		<li>XMLViewResolver - mapping config from xml file</li>
 		<li>ResourceBundleViewResolver - mapping from  property bundle file</li>
 		<li>UrlBasedViewResolver - maps urls directly to  views</li>
-		<li>InternalResourceViewResolver - extends  UrlBasedViewResolver, maps to servlets / jsps</li>
+		<li><strong>InternalResourceViewResolver</strong> - extends  UrlBasedViewResolver, maps to servlets / jsps</li>
 		<li>FreeMarkerViewResolver - extends  UrlBasedViewResolver</li>
 		<li>ContentNegotiatingViewResolver - maps based on  request file name or Accept header   </li>
-	</ul>
-	<p>Usage:</p>
-	<ul>
-		<li>Can be chained (using the &quot;order&quot; attribute). InternalResourceViewResolver must be last.</li>
-		<li>RedirectView or &quot;redirect:&quot;</li>
 	</ul>
 	<font color='blue' size="4">Handler Mapping</font>
 	<ul>
