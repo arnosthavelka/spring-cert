@@ -948,7 +948,7 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 		<li><strong>SERIALIZABLE</strong> - Ensures that a transaction can read identical rows from a table multiple times. For the duration of this transaction, inserts, updates, and deletes made by other transactions to this table are prohibited. All the  concurrency problems can be avoided, but the performance will be low.</li>
 	</ul>
 	
-	<h2>!!! 4. Spring MVC</h2>
+	<h2>4. Spring MVC</h2>
 	<h3>4.1 General configuration </h3>
 	<ul>
 		<li><strong>&lt;mvc:annotation-driven /&gt;</strong> - Registers the DefaultAnnotationHandlerMapping  and AnnotationMethodHandlerAdapter beans that are required for Spring MVC to dispatch requests to @Controllers.</li>
@@ -1000,10 +1000,15 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 
 	<h3>4.2 Controllers </h3>
 	<h4>4.2.1 Bootstrapping a root WebApplicationContext using the ContextLoaderListener</h4>
-      <p>The <strong>DispatcherServlet</strong> takes a contextConfigLocation  parameter in the web.xml or uses the default of <strong>${servlet_name}-servlet.xml</strong>. We need (to configure DispatcherServlet properly) to do:</p>
+      <p>The DispatcherServlet takes a <strong>contextConfigLocation</strong> parameter in the web.xml or uses the default of <strong>${servlet_name}-servlet.xml</strong>. We need (to configure DispatcherServlet properly) to do:</p>
 	<ul>
 		<li>Define listener so it loads the root ApplicationContext before initializing the servlet as:
-<pre class="prettyprint"><code class="language-xml">&lt;listener&gt;
+<pre class="prettyprint"><code class="language-xml">&lt;context-param&gt; &lt;!-- override default configuration name --&gt;
+    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+    &lt;param-value&gt;/WEB-INF/application-config.xml&lt;/param-value&gt;
+&lt;/context-param&gt;
+
+&lt;listener&gt;
     &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 </code></pre>
@@ -1012,19 +1017,16 @@ jdbcTemplate.batchUpdate(sql, setter); // or pass  Object[] as second parameter
 <pre class="prettyprint"><code class="language-xml">&lt;servlet&gt;
 	&lt;servlet-name&gt;mvc-dispatcher&lt;/servlet-name&gt;
 	&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+	&lt;init-param&gt; &lt;!-- override default configuration name --&gt;
+		&lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+		&lt;param-value&gt;/WEB-INF/web-application-config.xml&lt;/param-value&gt;
+	&lt;/init-param&gt;
 	&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
 &lt;/servlet&gt;
 
 &lt;servlet-mapping&gt;
 	...
 &lt;/servlet-mapping&gt;
-</code></pre>
-		</li>
-		<li>Default configuration file is <strong>/WEB-INF/applicationContext.xml</strong> or it can be overriden by:
-<pre class="prettyprint"><code class="language-xml">&lt;context-param&gt;
-    &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
-    &lt;param-value&gt;/WEB-INF/court-service.xml&lt;/param-value&gt;
-&lt;/context-param&gt;
 </code></pre>
 		</li>
 	</ul>
@@ -1050,7 +1052,7 @@ public class  AppointmentsController {...
 </code></pre>
 	<font color='blue' size="4">URI Template</font>
 	<ul>
-		<li>Ant syle globs:  @RequestMapping(&quot;/myPath/*/pets/{petId}&quot;)</li>
+		<li>Ant style globs:  @RequestMapping(&quot;/myPath/*/pets/{petId}&quot;)</li>
 		<li>Parameter conditions: @RequestMapping(value =  &quot;/pets/{petId}&quot;, params=&quot;myParam=myValue&quot;)</li>
 		<li>Header conditions: @RequestMapping(value =  &quot;/pets&quot;, method = RequestMethod.POST,  headers=&quot;content-type=text/*&quot;)</li>
 	</ul>
@@ -1059,7 +1061,7 @@ public String findOwner(@PathVariable("ownerId")  String ownerId, Model model) {
 </code></pre>
 	<h4>4.2.3 A method annotated with @RequestMapping can return a String. What does it refer to? What are the main parameter types that this method can accept? (based  on what you've seen in the class)</h4>
 	<ul>
-		<li>A method annotated with @RequestMapping returns: the view name - i.e. logical name of the view (to be deteremined by view resolver). For example, one can add a prefix/suffix to all strings returned, void (if the method handles the response directly), etc.</li>
+		<li>A method annotated with @RequestMapping returns the view name - i.e. logical name of the view (to be determined by view resolver). For example, one can add a prefix/suffix to all strings returned, void (if the method handles the response directly), etc.</li>
 		<li>Main parameter types of @RequestMapping method:
 			<ul>
 				<li><strong>Servlet API</strong> - HttpSession, HttpServletRequest,  HttpServletResponse</li>
@@ -1079,14 +1081,20 @@ public String findOwner(@PathVariable("ownerId")  String ownerId, Model model) {
 <pre class="prettyprint"><code class="language-java">@RequestMapping(method=RequestMethod.GET)
 public String findOwner(@RequestParam("ownerId")  String ownerId, Model model) {
 </code></pre>
-	<h4><font color='brown'>4.2.x-1 Configuring Spring MVC via XML</font></h4>
+	<h4><font color='brown'>4.2.5 Configuring Spring MVC via XML</font></h4>
 <pre class="prettyprint"><code class="language-xml">&lt;mvc:annotation-driven /&gt;
 &lt;mvc:interceptors  /&gt;
 </code></pre>
-	<h4><font color='brown'>4.2.x-2 Does Spring handle Multipart request?</font></h4>
+	<h4><font color='brown'>4.2.6 Does Spring handle Multipart request?</font></h4>
 	<p>Yes</p>
 	<ul>
-		<li>If you specify a multipart file resolver, the request is  inspected for multiparts.</li>
+		<li>If you specify a multipart file resolver, the request is  inspected for multiparts.
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"&gt;
+    &lt;!-- one of the properties available; the maximum file size in bytes --&gt;
+    &lt;property name="maxUploadSize" value="100000"/&gt;
+&lt;/bean&gt;
+</code></pre>
+		</li>
 		<li>If multiparts are found, the request is wrapped in a  MultipartHttpServletRequest for further processing by other elements in the process.</li>
 		<li>In the controller, use:  @RequestParam(&quot;myParam&quot;) MultipartFile file</li>
 	</ul>
@@ -1100,7 +1108,7 @@ public String findOwner(@RequestParam("ownerId")  String ownerId, Model model) {
 		<li>DELETE = delete</li>
 	</ul>
 	<h4><font color='brown'>4.3.2 Usage of the @PathVariable annotation</font></h4>
-	<p>Maps parts of the url in @RequestMapping to a  parameter. For example the URL /account/{id} goes with @PathVariable id in the method signature. See URI template in chapter 4.2.2</p>
+	<p>Maps parts of the url in @RequestMapping to a parameter (marked by annotation @PathVariable). For example the URL /account/{id} goes with @PathVariable id in the method signature. See URI template in chapter 4.2.2</p>
 	<h4><font color='brown'>4.3.3 What is the RestTemplate?</font></h4>
 	<p>Programmatic client for calling RESTful URLs.</p>
 <pre class="prettyprint"><code class="language-java">String result =  restTemplate.getForObject(&quot;http://example.com/hotels/{hotel}/bookings/{booking}&quot;, String.class,&quot;42&quot;, &quot;21&quot;);
@@ -1116,7 +1124,7 @@ t.delete(uri);
 		<li>If defined on the method, sends that header.</li>
 		<li>If defined on an exception, only sends if that error occurs.</li>
 		<li>An empty body can be used for REST so no view is used.</li>
-		<li>Annotation can go on @RequestMapping method or an exception class.</li>
+		<li>@ResponseStatus annotation can go on @RequestMapping method or an exception class.</li>
 	</ul>
 	<h4><font color='brown'>4.3.5 Purpose of the @ExceptionHandler Annotation</font></h4>
 	<ul>
@@ -1124,10 +1132,12 @@ t.delete(uri);
 		<li>If cannot annotate the actual exception, defines a response status in controller.</li>
 	</ul>
 	<p>For example:</p>
-	<ul>
-		<li>@ResponseStatus(HttpStatus.NOT_FOUND)</li>
-		<li>@ExceptionHandler({MyException.class})</li>
-	</ul>
+<pre class="prettyprint"><code class="language-java">@ExceptionHandler({MyException.class})
+@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "My Response Status Change….!!")
+public void handleMyException(MyException ex, HttpServletResponse response) {
+	logger.info("Handlng MyException - Catching: " + ex.getClass().getSimpleName());
+}
+</code></pre>
 	<h4><font color='brown'>4.3.6 What are HttpMessageConverters?</font></h4>
 	<ul>
 		<li>HttpMessageConverter to convert to / from HTTP</li>
@@ -1136,7 +1146,7 @@ t.delete(uri);
 		<li>Use @RequestBody to map params, use @ResponseBody to map return value</li>
 	</ul>
 
-	<h2>!!! 5. Advanced topics </h2>
+	<h2>5. Advanced topics </h2>
 	<h3>5.1 Remoting </h3>
 	<h4>5.1.1 Advantages of using Spring Remoting rather than plain RMI?</h4>
 	<ul>
@@ -1145,13 +1155,13 @@ t.delete(uri);
 		<li>Simplify things when both ends of remote call run Spring</li>
 	</ul>
 	<h4>5.1.2 Goal and general configuration of the RMI Service Exporter</h4>
-	<p>Goals:</p>
+	<font color='blue' size="4">Goals:</font>
 	<ul>
 		<li>Handle server side of RMI interaction</li>
 		<li>Bind to registry</li>
 		<li>Expose endpoint (used for everything except EJB; EJB  already has mechanism to export remote)</li>
 	</ul>
-	<p>General configuration:<br>
+	<font color='blue' size="4">General configuration:</font>
 <pre class="prettyprint"><code class="language-xml">&lt;bean class="org.springframework.remoting.rmi.RmiServiceExporter"&gt;
     &lt;property name="serviceName" value="AccountService"/&gt; &lt;!-- name in registry --&gt;
     &lt;property name="service" ref="accountService"/&gt; &lt;!-- reference to POJO implementing  serviceInterface --&gt;
@@ -1160,14 +1170,14 @@ t.delete(uri);
 &lt;/bean&gt;
 </code></pre>
 	<h4>5.1.3 Goal and general configuration of RMI Proxy Generator</h4>
-	<p>Goals:</p>
+	<font color='blue' size="4">Goals:</font>
 	<ul>
 		<li>Handle client side of RMI interaction</li>
 		<li>Communicate with endpoint</li>
 		<li>Convert remote exception to runtime exception</li>
 		<li>Can treat remote EJBs as POJOs</li>
 	</ul>
-	<p>General configuration:<br>
+	<font color='blue' size="4">General configuration:</font>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="accountService" class="org.springframework.remoting.rmi.RmiProxyFactoryBean"&gt;
     &lt;property name="serviceUrl" value="rmi://HOST:1199/AccountService"/&gt; &lt;!-- endpoint in registry (rmi://server:port/serviceName) --&gt;
     &lt;property name="serviceInterface" value="example.AccountService"/&gt; &lt;!-- interface classname --&gt;
@@ -1198,16 +1208,13 @@ t.delete(uri);
 	<ul>
 		<li><strong>Authentication</strong> is the process of verifying a principal's identity against what it claims to be.</li>
 		<li>A <strong>principal</strong> can be a user, a device or a system, but most typically, it's a user. </li>
-		<li>A principal has to provide evidence of identity to be authenticated. </li>
-		<li>This evidence is called a <strong>credential</strong>, which is usually a password when the target principal is a user.</li>
-		<li><strong>Authorization</strong> is the process of granting <strong>authorities</strong> to an authenticated user so that this user is allowed to access particular resources.</li>
-		<li>The authorization process must be performed after the authentication process.</li>
-		<li>Typically, authorities are granted in terms of roles.</li>
-		<li><strong>Access control</strong> means controlling access to an application's resources.</li>
-		<li>It entails making a decision on whether a user is allowed to access a resource.</li>
-		<li>This decision is called an access control decision, and it's made by comparing the resource's access attributes with the user's granted authorities or other characteristics.</li>
+		<li>A principal has to provide evidence of identity to be authenticated. This evidence is called a <strong>credential</strong>, which is usually a password when the target principal is a user.</li>
+		<li><strong>Authorization</strong> is the process of granting <strong>authorities</strong> to an authenticated user so that this user is allowed to access particular resources.
+			The authorization process must be performed after the authentication process. Typically, authorities are granted in terms of roles.</li>
+		<li><strong>Access control</strong> means controlling access to an application's resources. It entails making a decision on whether a user is allowed to access a resource. 
+			This decision is called an access control decision, and it's made by comparing the resource's access attributes with the user's granted authorities or other characteristics.</li>
 	</ul>
-      <p>Security is activated in web.xml:</p>
+      <p>Security is configured (activated) in web.xml as:</p>
 <pre class="prettyprint"><code class="language-xml">&lt;filter&gt;
     &lt;filter-name&gt;springSecurityFilterChain&lt;/filter-name&gt;
     &lt;filter-class&gt;org.springframework.web.filter.DelegatingFilterProxy&lt;/filter-class&gt;
@@ -1215,20 +1222,16 @@ t.delete(uri);
 </code></pre>
       <p>Auto-config includes:</p>
 <pre class="prettyprint"><code class="language-xml">&lt;http&gt;
-    &lt;form-login /&gt;
-    &lt;http-basic /&gt;
-    &lt;logout /&gt;
+    &lt;form-login /&gt; &lt;!-- to set form login authentication (login-pages, default-target-url, authentication-failure-url) --&gt;
+    &lt;http-basic /&gt; &lt;!-- to set HTTP basic authentication --&gt;
+    &lt;logout /&gt; &lt;!-- to set logout-success-url --&gt;
+    &lt;anonymous username=&quot;guest&quot;  granted-authority=&quot;ROLE_GUEST&quot; /&gt; &lt;!-- to setup the anonymous user --&gt;
+    &lt;remember-me /&gt; &lt;!-- to setup Remember-Me support --&gt;
 &lt;/http>
 </code></pre>
-	<ul>
-		<li>Use &lt;form-login /&gt; to set: login-pages, default-target-url,  authentication-failure-url</li>
-		<li>Use &lt;logout /&gt; to set:  logout-success-url</li>
-		<li>Use &lt;anonymous username=&quot;guest&quot;  granted-authority=&quot;ROLE_GUEST&quot; /&gt; to setup the anonymous user</li>
-		<li>Use &lt;remember-me /&gt; to setup Remember-Me Support</li>
-	</ul>
 
 	<h4>5.2.1 What is the &quot;Security filter chain&quot; used in Spring Security?</h4>
-	<p>Series of servlet filters (filter chain) that must be passed before/after resource is accessed. The chain is declared in web.xml (as servlet filter) and consists of:</p>
+	<p>Series of servlet filters (declared in web.xml) that must be passed before/after resource is accessed. The chain is declared in web.xml (as servlet filter) and consists of:</p>
 	<ul>
 		<li><strong>HttpSessionContextIntegrationFilter</strong> - loading HttpSession's context </li>
 		<li><strong>LogoutFilter</strong> - logging out if needed (logout was triggered)</li>
@@ -1241,7 +1244,7 @@ t.delete(uri);
     &lt;security:intercept-url pattern="/stuff/**"  [method="GET"] access="role1, role2" /&gt;
 &lt;/security:http&gt;
 </code></pre>
-	<ul><strong><font color="red">Check againt training materials!</font></strong>
+	<ul>
 		<li>Always end url with a &quot;*&quot; to prevent hackers skipping the check by adding extra request parameters</li>
 		<li>Pattern uses Ant syntax (** is any level of directories), can change to reg exp</li>
 		<li>Access can get IS_AUTHENTICATED_FULLY or a list of roles</li>
@@ -1250,35 +1253,28 @@ t.delete(uri);
 		<li>Anonymous users have the ROLE_ANONYMOUS role</li>
 	</ul>
 	<h4>5.2.3 Syntax to configure method level security</h4>
-	<strong><font color="red">Check againt training materials!</font></strong>
-	<h4>5.2.4 Method level security using @Secured or @RolesAllowed</h4>
-	<ul>
-		<li>Spring
-			<ul>
-				<li>XML activation - &lt;security:global-method-security <strong>secured-annotations</strong>=&quot;enabled&quot; /&gt;</li>
-				<li>Usage - <strong>@Secured</strong>(&quot;role1&quot;) to pass allowed roles</li>
-			</ul>
-		</li>
-		<li>JSR-250
-			<ul>
-				<li>XML activation - &lt;security:global-method-security <strong>jsr250-annotations</strong>=&quot;enabled&quot; /&gt;</li>
-				<li>Usage - <strong>@RolesAllowed</strong>(&quot;role1&quot;) to pass allowed roles</li>
-			</ul>
-		</li>
-		<li>Without annotations:
+	<font color='blue' size="4">Global setting (in XML):</font>
 <pre class="prettyprint"><code class="language-xml">&lt;security:global-method-security&gt;
-    &lt;security:protect-pointcut expression="execution(*  doStuff())" access="role" /&gt;
+    &lt;security:protect-pointcut expression="execution(* doStuff())" access="hasRole('ROLE_USER')" /&gt;
 &lt;/security:global-method-security&gt;
 </code></pre>
-		</li>
-		<li>Secure a bean with a list of method names using:
-<pre class="prettyprint"><code class="language-xml">&lt;bean  id="..." &gt;
+	<font color='blue' size="4">Secure a bean with a list of method names using:</font>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="..." &gt;
     &lt;security:intercept-methods&gt;
-        &lt;security:protect  method="com.apress.springrecipes.board.service.MessageBoardService.listMessages" access="ROLE_USER,ROLE_GUEST" /&gt;
+        &lt;security:protect method="com.apress.springrecipes.board.service.MessageBoardService.listMessages" access="ROLE_USER,ROLE_GUEST" /&gt;
     &lt;/security:intercept-methods&gt;
 &lt;/bean&gt;
 </code></pre>
-		</li>
+	<h4>5.2.4 Method level security using @Secured or @RolesAllowed</h4>
+	<font color='blue' size="4">Spring</font>
+	<ul>
+		<li>XML activation - &lt;security:global-method-security <strong>secured-annotations</strong>=&quot;enabled&quot; /&gt;</li>
+		<li>Usage - <strong>@Secured</strong>(&quot;role1&quot;) to pass allowed roles</li>
+	</ul>
+	<font color='blue' size="4">JSR-250</font>
+	<ul>
+		<li>XML activation - &lt;security:global-method-security <strong>jsr250-annotations</strong>=&quot;enabled&quot; /&gt;</li>
+		<li>Usage - <strong>@RolesAllowed</strong>(&quot;role1&quot;) to pass allowed roles</li>
 	</ul>
 	<h4>5.2.5 Possible mechanisms to store user details: database? LDAP? Others?</h4>
 	<ul>
@@ -1300,13 +1296,13 @@ t.delete(uri);
 	<h4>5.2.7. When working with an authentication provider, is it possible to use  a password encoder?</h4>
 	<p>Yes - &lt;security:password-encoder hash=&quot;abc&quot; /&gt;</p>
       <h4>5.2.8 In the security tag library, what is the purpose of the  &lt;security:authorize /&gt; tag?</h4>
-      <p>To say what roles are permitted access to a section of the JSP.</p>
+      <p>To say what roles are permitted access to a section of the JSP. Attribute <strong>access</strong> may have value or EL (but not both).</p>
 <pre class="prettyprint"><code class="language-xml">&lt;security:authorize access=&quot;hasRole('supervisor')&quot;&gt;do stuff&lt;/security:authorize&gt;
 &lt;security:authorize ifAnyGranted=&quot;roles&quot;&gt;do stuff&lt;/security:authorize&gt;
 </code></pre>
 	<p>Possible properties:</p>
-	<ul><strong><font color="red">Check againt training materials!</font></strong>
-		<li>access</li>
+	<ul>
+		<li>access (hasRole, hasAnyRole, isAnonymous, isAuthenticated)</li>
 		<li>url</li>
 		<li>ifAnyGranted</li>
 		<li>ifAllGranted</li>
