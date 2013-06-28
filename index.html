@@ -1309,8 +1309,22 @@ public void handleMyException(MyException ex, HttpServletResponse response) {
 	</ul>
 
 	<h3>5.3 JMS</h3>
+	<font color='blue' size="4">Basics</font>
+	<ul>
+		<li>Components: message, destination, connection, session, message producer and consumer</li>
+		<li>JMS message types: TextMessage, ObjectMessage, MapMessage, etc.</li>
+		<li>Destination is where we listen for a message</li>
+		<li>Response-destination is needed if the method  doesn't return void</li>
+		<li>Configuration:
+			<ul>
+				<li>Create connection factory and queues by creating bean for standalone or &lt;jee:jndi-lookup jndi-name=&quot;jms/aaa&quot; /&gt;</li>
+				<li>Can wrap with CachingConnectionFactory if need caching</li>
+			</ul>
+		</li>
+	</ul>
 	<font color='blue' size="4">JmsTemplate</font>
 	<ul>
+		<li>Reasons to use: see chapter 5.3.1</li>
 		<li>Instances of the JmsTemplate class are thread-safe once configured.</li>
 		<li>All send methods put message on queue and resume.</li>
 		<li>All receive methods are blocking / synchronous.</li>
@@ -1323,23 +1337,22 @@ public void handleMyException(MyException ex, HttpServletResponse response) {
 		</li>
 		<li>Methods (use MessageCreator - if need to map object to/from Message for nonstandard type):
 			<ul>
-				<li>&quot;convertAndSend()&quot; - delegates conversion to the MessageConverter bean (set on the JmsTemplate) and then sends message</li>
-				<li>&quot;convertAndSend()&quot; - waits to receive message and then delegates to the MessageConverter bean (set on the JmsTemplate).</li>
-				<li>&quot;execute()&quot; - use for SessionCallback and ProducerCallback</li>
+				<li><strong>convertAndSend()</strong> - delegates conversion to the MessageConverter bean (set on the JmsTemplate) and then sends message</li>
+				<li><strong>convertAndSend()</strong> - waits to receive message and then delegates to the MessageConverter bean (set on the JmsTemplate).</li>
+				<li><strong>execute()</strong> - use for SessionCallback and ProducerCallback</li>
 				<li>No callback methods exist.</li>
 			</ul>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate"
+          p:connectionFactory-ref="jmsProducerConnectionFactory"
+          p:defaultDestination-ref="destination" /&gt;
+&lt;/bean&gt;
+</code></pre>
 <pre class="prettyprint"><code class="language-java">jmsTemplate.send(this.queue, new MessageCreator() {
     public  Message createMessage(Session session) throws JMSException {
             return  session.createTextMessage("hello queue world");
     }
 });
 </code></pre>
-		</li>
-		<li>Configuration:
-			<ul>
-				<li>Create connection factory and queues by creating bean for standalone or &lt;jee:jndi-lookup jndi-name=&quot;jms/aaa&quot; /&gt;</li>
-				<li>Can wrap with CachingConnectionFactory if need caching</li>
-			</ul>
 		</li>
 	</ul>
 	<h4>5.3.1 Purpose of the JmsTemplate</h4>
@@ -1364,7 +1377,7 @@ public void handleMyException(MyException ex, HttpServletResponse response) {
 		</li>
 		<li>Define a container
 <pre class="prettyprint"><code class="language-xml">&lt;jms:listener-container connection-factory="connFactoryRef"&gt;
-    &lt;jms:listener destination="d" ref="myDelegate" /&gt;
+    &lt;jms:listener destination="queue.orders" ref="myDelegate" /&gt;
 &lt;/jms:listener-container&gt;
 </code></pre>
 		</li>
@@ -1374,18 +1387,25 @@ public void handleMyException(MyException ex, HttpServletResponse response) {
     <p><strong>Yes</strong> - just register  in XML inside a listener-container</p>
 <pre class="prettyprint"><code class="language-xml">&lt;jms:listener destination="d" ref="myDelegate" method="m" response-destination="rd" /&gt;
 </code></pre>
-	<p>MEM:</p>
-	<ul>
-		<li>destination is where we listen for a message</li>
-		<li>response-destination is needed if the method  doesn't return void</li>
-	</ul>
 	<h4>5.3.3 Is it possible to run JMS inside a plain Servlet container without full Java EE support (such as Tomcat or Jetty)?</h4>
 	<p><strong>Yes</strong> - with usage SimpleMessageListenerContainer (for basics) or DefaultMessageListenerContainer (for transactions).</p>
 
-
 	<h3>5.4 JMX</h3>
+	<font color='blue' size="4">Goals</font>
+	<ul>
+		<li>Gather information from application (in runtime)</li>
+		<li>Dynamically reconfigure application</li>
+		<li>Trigger operations in application</li>
+		<li>etc.</li>
+	</ul>
+	<font color='blue' size="4">Overview</font>
+	<ul>
+		<li>Spring easily export Spring-managed beans as JMX bean with &lt;context:mbean-export&gt;</li>
+		<li>Use &lt;context:mbean-server&gt; to create MBean server</li>
+		<li>Use Spring annotations to define attributes (@ManagedAttribute) and operations  (@ManagedOperation)</li>
+	</ul>
 	<h4>5.4.1 Role of the MBeanExporter</h4>
-	<p>Expose POJO as MBean. This class is responsible for taking your Spring beans and registering them with a JMX MBeanServer.</p>
+	<p>This class is responsible for taking your Spring beans and registering them with a JMX MBeanServer (expose POJO as MBean).</p>
 	<h4>5.4.2 Using Spring JMX, is it possible to export a POJO as an MBean?</h4>
 	<p><strong>Yes</strong> - register as a bean and use MBeanExporter</p>
 <pre class="prettyprint"><code class="language-xml">&lt;bean class="org.springframework.jmx.export.MBeanExporter"&gt;
@@ -1411,12 +1431,30 @@ public void handleMyException(MyException ex, HttpServletResponse response) {
 		<li><strong>@ManagedAttribute</strong> – expose field to JMX – place on getter and setter</li>
 		<li><strong>@ManagedOperation</strong> – expose method to JMX </li>
 	</ul>
+<pre class="prettyprint"><code class="language-java">@ManagedResource(description = "some description")
+public class MyJmxBean implements Foo {
+
+	private int counter=0;
+
+	@ManagedAttribute(description="Get counter value")
+	public int getCounter() {
+		return counter;
+	}
+	
+	@ManagedOperation(description="Increase counter")
+	public void increaseCounter() {
+		this.counter++;
+	
+}
+</code></pre>
+
 	<h4><font color='brown'>5.4.5 How to declare an MBeanServer</font></h4>
-      <p>Export MBeans: &lt;context:mbean-export /&gt; <br>
-        Automatic registration of existing MBeans: &lt;bean  id=&quot;mine&quot; class=&quot;ExistingMBean&quot; /&gt;<br>
-        Define MBeanServer: &lt;context:mbean-server /&gt; </p>
-      <p>Or declare the MBeanServerFactoryBean with the  locateExistingServerIfPossible property so it can use an existing server or  create a new one.</p>
-      <h4>5.4.6 Accessing remote MBean (through a proxy)</h4>
+	<ul>
+		<li>Automatic registration of existing MBeans: &lt;bean  id=&quot;mine&quot; class=&quot;ExistingMBean&quot; /&gt;</li>
+		<li>Define MBeanServer: &lt;context:mbean-server /&gt;</li>
+		<li>Or declare the MBeanServerFactoryBean with the  locateExistingServerIfPossible property so it can use an existing server or  create a new one.</li>
+	</ul>
+	<h4><font color='brown'>5.4.6 Accessing remote MBean (through a proxy)</font></h4>
 <pre class="prettyprint"><code class="language-xml">&lt;bean id="mbeanServerConnection"... /&gt;
     &lt;bean  id="..." class="org.springframework.jmx.access.MBeanProxyFactoryBean"&gt;
         &lt;property name="server" ref="mbeanServerConnection" /&gt;
