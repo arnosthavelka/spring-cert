@@ -316,7 +316,12 @@
 	</ul>
 	<h4>1.4.3 How to create an ApplicationContext? What are the resource prefixes that can be used? How to refer to a Spring configuration file inside a package? The different implementations of ApplicationContext that can be used in an application.</h4>
 	<font color='blue' size="4">Creation of ApplicationContext</font>
-<pre class="prettyprint"><code class="language-java">ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");</code></pre>
+<pre class="prettyprint"><code class="language-java">// XML configuration
+ApplicationContext ctx = new ClasspathXmlApplicationContext("one.ctx","two.ctx");
+
+// JavaConfig
+ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+</code></pre>
 	<p>Supports multiple resources</p>
 	<font color='blue' size="4">Prefixes</font>
 	<ul>
@@ -355,6 +360,9 @@ private String value;</code></pre>
 <pre class="prettyprint"><code class="language-xml">&lt;util:properties id="myProperties" location=&quot;/myFile.properties&quot; /&gt;
 </code></pre>
 	<p>Usage:</p>
+<pre class="prettyprint"><code class="language-xml">&lt;bean id="mind" class="Mine" p:a="#{myProperties[myPropName]}"/&gt;
+</code></pre>
+
 <pre class="prettyprint"><code class="language-java">@Value("#{myProperties[myPropName]}") // specify property file and configuration item
 private String myField; 
 
